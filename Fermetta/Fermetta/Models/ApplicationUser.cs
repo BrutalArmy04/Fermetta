@@ -17,6 +17,7 @@ namespace Fermetta.Models
         public int? PostalCode { get; set; }    
         public string? Country { get; set; }
         public DateTime LastAuthentiationDate { get; set; }
+        [NotMapped]
         public required IEnumerable<SelectListItem> AllRoles { get; set; }
 
 
