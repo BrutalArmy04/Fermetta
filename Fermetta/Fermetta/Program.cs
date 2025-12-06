@@ -26,13 +26,20 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
+//partea cu useri si roluri, prin seed data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    SeedData.Initialize(services);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Home/Error500");
     app.UseHsts();
 }
 
@@ -41,6 +48,10 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+
+app.UseStatusCodePagesWithReExecute("/Home/Error{0}");
+
 
 app.MapStaticAssets();
 
