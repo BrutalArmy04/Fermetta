@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Fermetta.Models
 {
@@ -56,9 +57,6 @@ namespace Fermetta.Models
                 // parolele sunt de tip hash
                 var hasher = new PasswordHasher<ApplicationUser>();
 
-                // CREAREA USERILOR IN BD
-                // Se creeaza cate un user pentru fiecare rol
-
                 // Admin
                 var adminUser = new ApplicationUser
                 {
@@ -68,7 +66,13 @@ namespace Fermetta.Models
                     EmailConfirmed = true,
                     NormalizedEmail = "ADMIN@TEST.COM",
                     Email = "admin@test.com",
-                    NormalizedUserName = "ADMIN@TEST.COM"
+                    NormalizedUserName = "ADMIN@TEST.COM",
+                    FirstName = "System",
+                    LastName = "Admin",
+                    RegistrationDate = DateTime.Now,
+                    Status = "Active",
+                    LastAuthentiationDate = DateTime.Now,
+                    AllRoles = Enumerable.Empty<SelectListItem>()
                 };
                 adminUser.PasswordHash = hasher.HashPassword(adminUser, "Admin1!");
 
@@ -81,7 +85,13 @@ namespace Fermetta.Models
                     EmailConfirmed = true,
                     NormalizedEmail = "EDITOR@TEST.COM",
                     Email = "editor@test.com",
-                    NormalizedUserName = "EDITOR@TEST.COM"
+                    NormalizedUserName = "EDITOR@TEST.COM",
+                    FirstName = "Content",
+                    LastName = "Editor",
+                    RegistrationDate = DateTime.Now,
+                    Status = "Active",
+                    LastAuthentiationDate = DateTime.Now,
+                    AllRoles = Enumerable.Empty<SelectListItem>()
                 };
                 editorUser.PasswordHash = hasher.HashPassword(editorUser, "Editor1!");
 
@@ -94,7 +104,13 @@ namespace Fermetta.Models
                     EmailConfirmed = true,
                     NormalizedEmail = "USER@TEST.COM",
                     Email = "user@test.com",
-                    NormalizedUserName = "USER@TEST.COM"
+                    NormalizedUserName = "USER@TEST.COM",
+                    FirstName = "Standard",
+                    LastName = "User",
+                    RegistrationDate = DateTime.Now,
+                    Status = "Active",
+                    LastAuthentiationDate = DateTime.Now,
+                    AllRoles = Enumerable.Empty<SelectListItem>()
                 };
                 normalUser.PasswordHash = hasher.HashPassword(normalUser, "User1!");
 
