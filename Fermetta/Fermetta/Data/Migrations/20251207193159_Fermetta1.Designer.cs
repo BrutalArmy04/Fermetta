@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fermetta.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251207131244_Fermetta1")]
+    [Migration("20251207193159_Fermetta1")]
     partial class Fermetta1
     {
         /// <inheritdoc />
@@ -48,7 +48,12 @@ namespace Fermetta.Data.Migrations
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Accounts");
                 });
@@ -59,9 +64,6 @@ namespace Fermetta.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -133,10 +135,6 @@ namespace Fermetta.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountId")
-                        .IsUnique()
-                        .HasFilter("[AccountId] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -286,13 +284,13 @@ namespace Fermetta.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Fermetta.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Fermetta.Models.Account", b =>
                 {
-                    b.HasOne("Fermetta.Models.Account", "Account")
-                        .WithOne("User")
-                        .HasForeignKey("Fermetta.Models.ApplicationUser", "AccountId");
+                    b.HasOne("Fermetta.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("Account");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -343,12 +341,6 @@ namespace Fermetta.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Fermetta.Models.Account", b =>
-                {
-                    b.Navigation("User")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

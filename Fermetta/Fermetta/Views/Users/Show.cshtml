@@ -45,12 +45,27 @@
 
     <div class="col-md-6">
         <h3>Roles</h3>
+
+        @* Afișare mesaje (succes/eroare) după o operațiune *@
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                @TempData["Message"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["Error"]
+            </div>
+        }
+
         @if (ViewBag.Roles != null && ViewBag.Roles.Count > 0)
         {
             <ul>
                 @foreach (var role in ViewBag.Roles)
                 {
-                    <li>@role</li>
+                    <li><strong>@role</strong></li>
                 }
             </ul>
         }
@@ -58,7 +73,39 @@
         {
             <p>This user has no assigned roles.</p>
         }
+
+        @* Formularul de schimbare a rolului (Vizibil doar pentru Admini) *@
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="card p-3 mt-4">
+                <h4>Change User Role</h4>
+
+                @* Verificarea esențială: Nu se poate edita pe sine *@
+                @if (Model.Id != ViewBag.CurrentUserId)
+                {
+                    <form method="post" asp-action="ChangeRole" asp-route-id="@Model.Id">
+                        <div class="form-group mb-3">
+                            <label for="newRole">Select New Role:</label>
+                            <select name="newRole" id="newRole" class="form-control" asp-items="@Model.AllRoles">
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Apply Role Change</button>
+                    </form>
+                }
+                else
+                {
+                    // Mesaj pentru cazul în care Adminul își vede propriul profil
+                    <div class="alert alert-info mt-2">
+                        You cannot modify your own role.
+                    </div>
+                }
+            </div>
+        }
     </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-secondary">Back to User List</a>
 </div>
 
 <div class="mt-4">
