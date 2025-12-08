@@ -152,7 +152,7 @@ namespace Fermetta.Controllers
             TempData["Message"] = $"{user.UserName}'s role is now {newRole}!";
             return RedirectToAction("Show", new { id = id });
         }
-
+        
 
 
     }       
