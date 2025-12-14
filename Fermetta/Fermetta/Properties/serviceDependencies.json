@@ -11,6 +11,11 @@
     "mssql2": {
       "type": "mssql",
       "connectionId": "DBFermetta"
+    },
+    "mssql3": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DatabaseConnectionFERMETTA_MAIA",
+      "dynamicId": null
     }
   }
 }

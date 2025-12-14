@@ -4,6 +4,7 @@ using Fermetta.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fermetta.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251208210805_CategoryAndProduct")]
+    partial class CategoryAndProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,6 +182,9 @@ namespace Fermetta.Data.Migrations
                     b.Property<int>("Category_Id")
                         .HasColumnType("int");
 
+                    b.Property<int>("Category_Id1")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -201,7 +207,7 @@ namespace Fermetta.Data.Migrations
 
                     b.HasKey("Product_Id");
 
-                    b.HasIndex("Category_Id");
+                    b.HasIndex("Category_Id1");
 
                     b.ToTable("Products");
                 });
@@ -356,7 +362,7 @@ namespace Fermetta.Data.Migrations
                 {
                     b.HasOne("Fermetta.Models.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("Category_Id")
+                        .HasForeignKey("Category_Id1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
