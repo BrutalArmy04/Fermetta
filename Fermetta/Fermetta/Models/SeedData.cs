@@ -40,8 +40,8 @@ namespace Fermetta.Models
                 new IdentityRole
                 {
                     Id = "2c5e174e-3b0e-446f-86af-483d56fd7211",
-                    Name = "Editor",
-                    NormalizedName = "Editor".ToUpper()
+                    Name = "Contributor",
+                    NormalizedName = "Contributor".ToUpper()
                 },
 
                 new IdentityRole
@@ -76,24 +76,24 @@ namespace Fermetta.Models
                 };
                 adminUser.PasswordHash = hasher.HashPassword(adminUser, "Admin1!");
 
-                // Editor
-                var editorUser = new ApplicationUser
+                // Contributor
+                var contribUser = new ApplicationUser
                 {
                     Id = "8e445865-a24d-4543-a6c6-9443d048cdb1",
                     // primary key
-                    UserName = "editor@test.com",
+                    UserName = "contrib@test.com",
                     EmailConfirmed = true,
-                    NormalizedEmail = "EDITOR@TEST.COM",
-                    Email = "editor@test.com",
-                    NormalizedUserName = "EDITOR@TEST.COM",
+                    NormalizedEmail = "CONTRIB@TEST.COM",
+                    Email = "contrib@test.com",
+                    NormalizedUserName = "CONTRIB@TEST.COM",
                     FirstName = "Content",
-                    LastName = "Editor",
+                    LastName = "Contributor",
                     RegistrationDate = DateTime.Now,
                     Status = "Active",
                     LastAuthentiationDate = DateTime.Now,
                     AllRoles = Enumerable.Empty<SelectListItem>()
                 };
-                editorUser.PasswordHash = hasher.HashPassword(editorUser, "Editor1!");
+                contribUser.PasswordHash = hasher.HashPassword(contribUser, "Contrib1!");
 
                 // User
                 var normalUser = new ApplicationUser
@@ -114,7 +114,7 @@ namespace Fermetta.Models
                 };
                 normalUser.PasswordHash = hasher.HashPassword(normalUser, "User1!");
 
-                context.Users.AddRange(adminUser, editorUser, normalUser);
+                context.Users.AddRange(adminUser, contribUser, normalUser);
 
                 // ASOCIEREA USER-ROLE
                 context.UserRoles.AddRange(
