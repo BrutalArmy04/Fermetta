@@ -137,6 +137,41 @@ namespace Fermetta.Models
                     UserId = "8e445865-a24d-4543-a6c6-9443d048cdb2"
                 }
                 );
+
+                if (!context.Categories.Any())
+                {
+                    context.Categories.AddRange(
+                        new Category { Name = "Dairy", Description = "Products made from fresh cow and goat milk.", Disponibility = true },
+                        new Category { Name = "Vegetables", Description = "Seasonal vegetables, naturally grown on the farm.", Disponibility = true },
+                        new Category { Name = "Flowers", Description = "Bouquets and potted seasonal flowers.", Disponibility = true }
+                    );
+
+                    context.SaveChanges(); // Save categories to get Category_Id values
+                }
+
+
+                if (!context.Products.Any())
+                {
+                    var dairyId = context.Categories.First(c => c.Name == "Dairy").Category_Id;
+                    var vegetablesId = context.Categories.First(c => c.Name == "Vegetables").Category_Id;
+                    var flowersId = context.Categories.First(c => c.Name == "Flowers").Category_Id;
+
+
+                    context.Products.AddRange(
+                        // Dairy
+                        new Product { Name = "Natural Goat Yogurt", Weight = 350, Valability = DateTime.Now.AddDays(7), Price = 9.00M, Stock = 40, Personalised = false, Category_Id = dairyId },
+                        new Product { Name = "Homemade Cheese (Cașcaval)", Weight = 500, Valability = DateTime.Now.AddDays(45), Price = 32.00M, Stock = 15, Personalised = false, Category_Id = dairyId },
+
+                        // Vegetables
+                        new Product { Name = "Cherry Tomatoes", Weight = 500, Valability = DateTime.Now.AddDays(5), Price = 15.00M, Stock = 100, Personalised = false, Category_Id = vegetablesId },
+                        new Product { Name = "Zucchini", Weight = 300, Valability = DateTime.Now.AddDays(8), Price = 6.00M, Stock = 80, Personalised = false, Category_Id = vegetablesId },
+
+                        // Flowers
+                        new Product { Name = "Tulip Bouquet", Weight = 500, Valability = DateTime.Now.AddDays(7), Price = 55.00M, Stock = 25, Personalised = true, Category_Id = flowersId },
+                        new Product { Name = "Potted Lavender", Weight = 1500, Valability = DateTime.Now.AddMonths(12), Price = 35.00M, Stock = 15, Personalised = false, Category_Id = flowersId }
+                    );
+                }
+
                 context.SaveChanges();
             }
         }
