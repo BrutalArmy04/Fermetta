@@ -13,7 +13,7 @@ namespace Fermetta.Data
         }
 
         public DbSet<Account> Accounts { get; set; }
-
+        /*
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -22,6 +22,20 @@ namespace Fermetta.Data
                 .HasOne(u => u.Account)
                 .WithOne(a => a.User)
                 .HasForeignKey<ApplicationUser>(u => u.AccountId);
+        }*/
+
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.Category_Id);
         }
+
     }
 }

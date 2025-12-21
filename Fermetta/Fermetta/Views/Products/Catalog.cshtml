@@ -1,0 +1,43 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@*Lista produse*@
+@foreach (var p in ViewBag.Products)
+{
+    <div class="mb-2">
+        <a asp-controller="Products"
+           asp-action="Details"
+           asp-route-id="@p.Product_Id">
+            <strong>@p.Name</strong>
+        </a>
+        <div>
+            Preț: @p.Price lei
+        </div>
+    </div>
+}
+
+
+<div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link" href="@ViewBag.PaginationBaseUrl=1" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            @for (int i = 1; i <= ViewBag.lastPage; i++)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@ViewBag.PaginationBaseUrl=@i">@(i)</a>
+                </li>
+            }
+
+            <li class="page-item">
+                <a class="page-link" href="@ViewBag.PaginationBaseUrl=@(ViewBag.lastPage)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

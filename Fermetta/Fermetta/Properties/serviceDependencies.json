@@ -1,13 +1,21 @@
 {
   "dependencies": {
+    "secrets1": {
+      "type": "secrets",
+      "dynamicId": null
+    },
     "mssql1": {
       "type": "mssql",
       "connectionId": "ConnectionStrings:DefaultConnection"
     },
+    "mssql3": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DatabaseConnectionFERMETTA_MAIA",
+      "dynamicId": null
+    },
     "mssql2": {
       "type": "mssql",
-      "connectionId": "DBFermetta",
-      "dynamicId": null
+      "connectionId": "DBFermetta"
     }
   }
 }
