@@ -7,7 +7,7 @@ using Fermetta.Models;
 
 namespace Fermetta.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User,Contributor")]
     public class ShoppingCartController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -159,7 +159,7 @@ namespace Fermetta.Controllers
                 }
             }
 
-            TempData["Message"] = "Produs șters din coș.";
+            TempData["Message"] = "Product deleted from the cart.";
             return RedirectToAction(nameof(Index));
         }
     }
