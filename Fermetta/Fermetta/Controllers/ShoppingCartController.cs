@@ -7,7 +7,7 @@ using Fermetta.Models;
 
 namespace Fermetta.Controllers
 {
-    [Authorize] 
+    [Authorize]
     public class ShoppingCartController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -45,6 +45,15 @@ namespace Fermetta.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
 
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null) return NotFound("Produsul nu a fost găsit.");
+
+            if (product.Stock <= 0)
+            {
+                TempData["Error"] = $"Ne pare rău, produsul '{product.Name}' nu mai este pe stoc.";
+                return RedirectToAction("Catalog", "Products");
+            }
+
             var cart = await _context.ShoppingCarts
                 .Include(c => c.CartItems)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
@@ -53,13 +62,19 @@ namespace Fermetta.Controllers
             {
                 cart = new ShoppingCart { UserId = user.Id };
                 _context.ShoppingCarts.Add(cart);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
             }
 
-            var product = await _context.Products.FindAsync(productId);
-            if (product == null) return NotFound("Produsul nu a fost găsit.");
-
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+
+            int currentQty = cartItem?.Quantity ?? 0;
+            int newQty = currentQty + 1;
+
+            if (newQty > product.Stock)
+            {
+                TempData["Error"] = $"Nu puteți adăuga mai mult. Stoc maxim disponibil: {product.Stock}.";
+                return RedirectToAction("Catalog", "Products");
+            }
 
             if (cartItem != null)
             {
@@ -91,6 +106,7 @@ namespace Fermetta.Controllers
 
             var cart = await _context.ShoppingCarts
                 .Include(c => c.CartItems)
+                .ThenInclude(ci => ci.Product)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
             if (cart != null)
@@ -99,16 +115,24 @@ namespace Fermetta.Controllers
 
                 if (cartItem != null)
                 {
-                    if (quantity > 0)
+                    if (quantity < 1)
                     {
-                        cartItem.Quantity = quantity;
+                        TempData["Error"] = "Cantitatea minimă este 1.";
+                    }
+                    else if (quantity > cartItem.Product.Stock)
+                    {
+                        TempData["Error"] = $"Stoc insuficient! Disponibil doar: {cartItem.Product.Stock} bucăți.";
+                        cartItem.Quantity = cartItem.Product.Stock;
                         _context.Update(cartItem);
+                        await _context.SaveChangesAsync();
                     }
                     else
                     {
-                        _context.CartItems.Remove(cartItem);
+                        cartItem.Quantity = quantity;
+                        _context.Update(cartItem);
+                        await _context.SaveChangesAsync();
+                        TempData["Message"] = "Coș actualizat!";
                     }
-                    await _context.SaveChangesAsync();
                 }
             }
 
@@ -135,6 +159,7 @@ namespace Fermetta.Controllers
                 }
             }
 
+            TempData["Message"] = "Produs șters din coș.";
             return RedirectToAction(nameof(Index));
         }
     }
