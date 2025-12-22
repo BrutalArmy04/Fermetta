@@ -27,9 +27,9 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="border-0 p-3" scope="col">Produs</th>
-                                        <th class="border-0 p-3" scope="col">Preț</th>
-                                        <th class="border-0 p-3" scope="col">Cantitate</th>
+                                        <th class="border-0 p-3" scope="col">Product</th>
+                                        <th class="border-0 p-3" scope="col">Price</th>
+                                        <th class="border-0 p-3" scope="col">Amount</th>
                                         <th class="border-0 p-3" scope="col">Total</th>
                                         <th class="border-0 p-3" scope="col"></th>
                                     </tr>
@@ -58,7 +58,7 @@
 
                                                     <div class="input-group input-group-sm" style="width: 120px;">
                                                         <input type="number" name="quantity" value="@item.Quantity" min="1" max="100" class="form-control text-center" />
-                                                        <button class="btn btn-outline-secondary" type="submit" title="Actualizează">
+                                                        <button class="btn btn-outline-secondary" type="submit" title="Update">
                                                             ↻
                                                         </button>
                                                     </div>
@@ -70,8 +70,8 @@
                                             <td class="p-3 text-end">
                                                 <form asp-controller="ShoppingCart" asp-action="RemoveFromCart" method="post">
                                                     <input type="hidden" name="productId" value="@item.ProductId" />
-                                                    <button type="submit" class="btn btn-link text-danger p-0" title="Șterge din coș">
-                                                        <i class="bi bi-trash"></i> Șterge
+                                                    <button type="submit" class="btn btn-link text-danger p-0" title="Remove from Cart">
+                                                        <i class="bi bi-trash"></i> Remove
                                                     </button>
                                                 </form>
                                             </td>
@@ -85,7 +85,7 @@
 
                 <div class="d-flex justify-content-between">
                     <a asp-controller="Products" asp-action="Catalog" class="btn btn-outline-dark">
-                        &laquo; Continuă Cumpărăturile
+                        &laquo; Continue Shopping
                     </a>
                 </div>
             </div>
@@ -93,17 +93,14 @@
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-success text-white py-3">
-                        <h5 class="mb-0">Sumar Comandă</h5>
+                        <h5 class="mb-0">Order Review</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal</span>
+                            <span>Total</span>
                             <span>@Model.TotalAmount.ToString("0.00") RON</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-4">
-                            <span>Livrare</span>
-                            <span class="text-success">Gratuit</span>
-                        </div>
+                        
                         <hr>
                         <div class="d-flex justify-content-between mb-4">
                             <span class="fs-5 fw-bold">Total</span>
@@ -111,10 +108,10 @@
                         </div>
 
                         <a href="#" class="btn btn-success w-100 btn-lg shadow-sm">
-                            Finalizează Comanda
+                            Finish Order
                         </a>
                         <div class="text-center mt-3">
-                            <small class="text-muted">Plată securizată</small>
+                            <small class="text-muted">Safe Payment</small>
                         </div>
                     </div>
                 </div>

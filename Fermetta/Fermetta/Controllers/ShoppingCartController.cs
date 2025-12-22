@@ -80,7 +80,7 @@ namespace Fermetta.Controllers
             await _context.SaveChangesAsync();
             TempData["Message"] = "Produs adăugat în coș!";
 
-            return RedirectToAction("Index", "Products");
+            return RedirectToAction("Catalog", "Products");
         }
 
         // Edit

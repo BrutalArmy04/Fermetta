@@ -1,47 +1,81 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@*Lista produse*@
-@foreach (var p in ViewBag.Products)
-{
-    <div class="mb-2">
-        <a asp-controller="Products"
-           asp-action="Details"
-           asp-route-id="@p.Product_Id">
-            <strong>@p.Name</strong>
-        </a>
-        <div>
-            Preț: @p.Price lei
-        </div>
-    </div>
+﻿@{
+    ViewData["Title"] = "Catalog Produse";
 }
 
+<div class="container py-4">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-<div>
-    <nav aria-label="Page navigation example">
-        <ul class="pagination">
-            <li class="page-item">
-                <a class="page-link" href="@ViewBag.PaginationBaseUrl=1" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
+    <h2 class="mb-4 text-success">Produse Disponibile</h2>
 
-            @for (int i = 1; i <= ViewBag.lastPage; i++)
-            {
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var p in ViewBag.Products)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 150px;">
+                        <span class="fs-1">🌱</span>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Products" asp-action="Details" asp-route-id="@p.Product_Id" class="text-decoration-none text-dark">
+                                @p.Name
+                            </a>
+                        </h5>
+
+                        @if (p.Category != null)
+                        {
+                            <span class="badge bg-success mb-2">@p.Category.Name</span>
+                        }
+
+                        <p class="card-text fs-5 fw-bold text-success">
+                            @p.Price lei
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-top-0">
+                        <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                            <input type="hidden" name="productId" value="@p.Product_Id" />
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-success">
+                                    <i class="bi bi-cart-plus"></i> Add to Cart
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-5 d-flex justify-content-center">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
                 <li class="page-item">
-                    <a class="page-link" href="@ViewBag.PaginationBaseUrl=@i">@(i)</a>
+                    <a class="page-link text-success" href="@ViewBag.PaginationBaseUrl=1" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
                 </li>
-            }
 
-            <li class="page-item">
-                <a class="page-link" href="@ViewBag.PaginationBaseUrl=@(ViewBag.lastPage)" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+                @for (int i = 1; i <= ViewBag.lastPage; i++)
+                {
+                    <li class="page-item">
+                        <a class="page-link text-success" href="@ViewBag.PaginationBaseUrl=@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item">
+                    <a class="page-link text-success" href="@ViewBag.PaginationBaseUrl=@(ViewBag.lastPage)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
-
-
-
-
