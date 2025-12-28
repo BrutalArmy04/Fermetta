@@ -28,6 +28,9 @@ namespace Fermetta.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -56,6 +59,23 @@ namespace Fermetta.Data
                 .HasOne(ci => ci.Product)
                 .WithMany() 
                 .HasForeignKey(ci => ci.ProductId);
+
+           
+            builder.Entity<OrderItem>()
+                .HasKey(oi => new { oi.OrderId, oi.ProductId });
+
+            // Relatia OrderItem -> ORder
+            builder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId);
+
+            // Relatia OrderItem -> Product
+            builder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductId);
+
         }
 
     }
