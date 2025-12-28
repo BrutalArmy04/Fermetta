@@ -34,6 +34,10 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Products" asp-action="Catalog">Catalog</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index"> Categories </a>
+                        </li>
+
 
                         @if (SignInManager.IsSignedIn(User) && (User.IsInRole("User") || (User.IsInRole("Contributor"))))
                         {
@@ -41,6 +45,16 @@
                                 <a class="nav-link text-dark " asp-area="" asp-controller="ShoppingCart" asp-action="Index">My Cart</a>
                             </li>
                         }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Products" asp-action="Index">
+                                    Manage Products
+                                </a>
+                            </li>
+                        }
+
 
                         @if (User.IsInRole("Admin"))
                         {

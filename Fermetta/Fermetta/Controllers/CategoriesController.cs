@@ -22,7 +22,10 @@ namespace Fermetta.Controllers
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            var categories = await _context.Categories
+                .Include(c => c.Products)
+                .ToListAsync();
+            return View(categories);
         }
 
         // GET: Categories/Details/5
@@ -34,6 +37,7 @@ namespace Fermetta.Controllers
             }
 
             var category = await _context.Categories
+                .Include(c => c.Products)
                 .FirstOrDefaultAsync(m => m.Category_Id == id);
             if (category == null)
             {

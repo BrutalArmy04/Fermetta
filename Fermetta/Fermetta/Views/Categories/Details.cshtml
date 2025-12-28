@@ -1,36 +1,83 @@
 ﻿@model Fermetta.Models.Category
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Category Details";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h3 class="text-success mb-1">
+                        <i class="bi bi-tags"></i> @Model.Name
+                    </h3>
+                    <div class="text-muted small">Category ID: @Model.Category_Id</div>
+                </div>
 
-<div>
-    <h4>Category</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Disponibility)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Disponibility)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Category_Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+                <div>
+                    @if (Model.Disponibility)
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Unavailable</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted"
+                         style="height: 220px;">
+                        <span class="fs-1">🏷️</span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-3">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to categories
+                        </a>
+
+                        <a asp-controller="Products"
+                           asp-action="Catalog"
+                           asp-route-categoryId="@Model.Category_Id"
+                           class="btn btn-success">
+                            View products <i class="bi bi-arrow-right"></i>
+                        </a>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Category_Id" class="btn btn-outline-success">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <h5 class="mb-2">Description</h5>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p class="text-muted">@Model.Description</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No description available.</p>
+                    }
+
+                    <hr />
+
+                    <div class="text-muted small">
+                        <i class="bi bi-box-seam"></i>
+                        Products in this category:
+                        <span class="fw-semibold text-dark">@((Model.Products?.Count) ?? 0)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
