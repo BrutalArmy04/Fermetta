@@ -83,6 +83,20 @@
                                 </a>
                             </li>
                         }
+                        @if (User.IsInRole("Editor"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ChangeRequests" asp-action="Create">Create a request</a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ChangeRequests" asp-action="Inbox">New Requests</a>
+                            </li>
+                        }
+
 
 
 

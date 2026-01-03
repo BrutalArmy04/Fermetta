@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Fermetta.Models.ChangeRequests.ChangeRequest>
+
+@{
+    ViewData["Title"] = "New requests";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No pending requests.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Action</th>
+                <th>Note</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@r.Type</td>
+                    <td>@r.Action</td>
+                    <td>@(string.IsNullOrWhiteSpace(r.ContributorNote) ? "-" : r.ContributorNote)</td>
+                    <td>
+                        <a class="btn btn-sm btn-primary" asp-action="Review" asp-route-id="@r.ChangeRequest_Id">Review</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

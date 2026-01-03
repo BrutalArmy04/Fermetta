@@ -1,4 +1,5 @@
 ﻿using Fermetta.Models;
+using Fermetta.Models.ChangeRequests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,8 @@ namespace Fermetta.Data
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<ChangeRequest> ChangeRequests { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder builder)
