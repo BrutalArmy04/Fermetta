@@ -20,10 +20,12 @@
             <p class="text-muted mb-0">Choose a category and explore our products.</p>
         </div>
 
-        @* dacă vrei doar Admin/Contributor aici, pune un if *@
-        <a asp-action="Create" class="btn btn-outline-success">
-            <i class="bi bi-plus-circle"></i> Add Category
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-outline-success">
+                <i class="bi bi-plus-circle"></i> Add Category
+            </a>
+        }
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
@@ -82,12 +84,18 @@
                         <a asp-action="Details" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-secondary">
                             Details
                         </a>
-                        <a asp-action="Edit" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-secondary">
-                            Edit
-                        </a>
-                        <a asp-action="Delete" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-danger">
-                            Delete
-                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-secondary">
+                                Edit
+                            </a>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </a>
+                        }
                     </div>
 
                 </div>
