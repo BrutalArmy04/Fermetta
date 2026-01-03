@@ -45,6 +45,13 @@
                                 <a class="nav-link text-dark " asp-area="" asp-controller="ShoppingCart" asp-action="Index">My Cart</a>
                             </li>
                         }
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Wishlist" asp-action="Index">Wishlist</a>
+                            </li>
+                        }
+
 
                         @if (User.IsInRole("Admin"))
                         {
@@ -105,6 +112,16 @@
                 </div>
             </div>
         </nav>
+        @{
+            var authMsg = TempData.Peek("AuthMessage") as string;
+        }
+        @if (!string.IsNullOrWhiteSpace(authMsg))
+        {
+            <div class="alert alert-info mb-3">
+                @authMsg
+            </div>
+        }
+
     </header>
     <div class="container">
         <main role="main" class="pb-3">

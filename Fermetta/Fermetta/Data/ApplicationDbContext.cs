@@ -32,6 +32,7 @@ namespace Fermetta.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<ChangeRequest> ChangeRequests { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
 
 
 
@@ -78,6 +79,11 @@ namespace Fermetta.Data
                 .HasOne(oi => oi.Product)
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId);
+            // Relatia WishlistItem -> User, Product
+            builder.Entity<WishlistItem>()
+                .HasIndex(w => new { w.UserId, w.Product_Id })
+                .IsUnique();
+
 
         }
 

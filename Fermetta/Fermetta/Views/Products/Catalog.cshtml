@@ -40,15 +40,26 @@
                     </div>
 
                     <div class="card-footer bg-white border-top-0">
+                    <div class="d-grid gap-2">
                         <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@p.Product_Id" />
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-outline-success">
-                                    <i class="bi bi-cart-plus"></i> Add to Cart
-                                </button>
-                            </div>
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </button>
+                        </form>
+
+                        <form asp-controller="Wishlist" asp-action="Add" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@p.Product_Id" />
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="bi bi-heart"></i> Add to Wishlist
+                            </button>
                         </form>
                     </div>
+                </div>
+
+                    
                 </div>
             </div>
         }

@@ -3,6 +3,15 @@
 @{
     ViewData["Title"] = "Product Details";
 }
+@{
+    var backUrl = Context.Request.Headers["Referer"].ToString();
+
+    // fallback safe (nu Index, ca sa nu dea Access Denied)
+    if (string.IsNullOrWhiteSpace(backUrl))
+    {
+        backUrl = Url.Action("Catalog", "Products");
+    }
+}
 
 <div class="container py-4">
     <div class="card shadow-sm">
@@ -47,9 +56,10 @@
 
                     <div class="mt-3">
                         <div class="d-grid gap-2">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
+                            <a href="@backUrl" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left"></i> Back to list
                             </a>
+
 
                             @if (User.IsInRole("Admin"))
                             {
