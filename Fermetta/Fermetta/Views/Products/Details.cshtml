@@ -1,4 +1,4 @@
-﻿@model Fermetta.Models.Product
+﻿@model Fermetta.Models.ViewModels.ProductDetails
 
 @{
     ViewData["Title"] = "Product Details";
@@ -12,6 +12,27 @@
         backUrl = Url.Action("Catalog", "Products");
     }
 }
+@if (User.Identity.IsAuthenticated)
+{
+    <form asp-action="AddReview" asp-controller="Products" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
+
+        <select name="rating" class="form-select">
+            @for (int i = 5; i >= 1; i--)
+            {
+                <option value="@i">@i stele</option>
+            }
+        </select>
+
+        <textarea name="comment" class="form-control" required></textarea>
+
+        <button type="submit" class="btn btn-primary mt-2">
+            Trimite review
+        </button>
+    </form>
+}
 
 <div class="container py-4">
     <div class="card shadow-sm">
@@ -19,15 +40,15 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <h3 class="text-success mb-1">
-                        <i class="bi bi-info-circle"></i> @Model.Name
+                        <i class="bi bi-info-circle"></i> @Model.Product.Name
                     </h3>
                     <div class="text-muted small">
-                        Product ID: @Model.Product_Id
+                        Product ID: @Model.Product.Product_Id
                     </div>
                 </div>
 
                 <div class="text-end">
-                    @if (Model.Stock > 0)
+                    @if (Model.Product.Stock > 0)
                     {
                         <span class="badge bg-success">In stock</span>
                     }
@@ -36,7 +57,7 @@
                         <span class="badge bg-danger">Out of stock</span>
                     }
 
-                    @if (Model.Personalised)
+                    @if (Model.Product.Personalised)
                     {
                         <span class="badge bg-warning text-dark ms-2">
                             <i class="bi bi-stars"></i> Personalised
@@ -63,7 +84,7 @@
 
                             @if (User.IsInRole("Admin"))
                             {
-                                <a asp-action="Edit" asp-route-id="@Model.Product_Id" class="btn btn-outline-success">
+                                <a asp-action="Edit" asp-route-id="@Model.Product.Product_Id" class="btn btn-outline-success">
                                     <i class="bi bi-pencil-square"></i> Edit
                                 </a>
                             }
@@ -77,28 +98,28 @@
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-currency-exchange"></i> Price</div>
-                            <div class="fs-5 fw-bold text-success">@Model.Price lei</div>
+                            <div class="fs-5 fw-bold text-success">@Model.Product.Price lei</div>
                         </div>
 
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-box-seam"></i> Stock</div>
-                            <div class="fs-5 fw-semibold">@Model.Stock</div>
+                            <div class="fs-5 fw-semibold">@Model.Product.Stock</div>
                         </div>
 
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-speedometer2"></i> Weight</div>
-                            <div class="fw-semibold">@Model.Weight</div>
+                            <div class="fw-semibold">@Model.Product.Weight</div>
                         </div>
 
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-calendar-check"></i> Valability</div>
-                            <div class="fw-semibold">@Model.Valability</div>
+                            <div class="fw-semibold">@Model.Product.Valability</div>
                         </div>
 
                         <div class="col-sm-12 mb-1">
                             <div class="text-muted small"><i class="bi bi-tag"></i> Category</div>
                             <div class="fw-semibold">
-                                @(Model.Category != null ? Model.Category.Name : "—")
+                                @(Model.Product.Category != null ? Model.Product.Category.Name : "—")
                             </div>
                         </div>
                     </div>
@@ -113,7 +134,7 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
                         {
                             <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="m-0">
-                                <input type="hidden" name="productId" value="@Model.Product_Id" />
+                                <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
                                 <button type="submit" class="btn btn-outline-success">
                                     <i class="bi bi-cart-plus"></i> Add to Cart
                                 </button>

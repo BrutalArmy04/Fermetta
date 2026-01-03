@@ -28,5 +28,8 @@ namespace Fermetta.Models
         public int Category_Id { get; set; }
         [ForeignKey(nameof(Category_Id))]
         public Category? Category { get; set; }
+
+        public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+
     }
 }

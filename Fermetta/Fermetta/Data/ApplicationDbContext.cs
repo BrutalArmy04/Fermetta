@@ -33,6 +33,7 @@ namespace Fermetta.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<ChangeRequest> ChangeRequests { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<ProductReview> ProductReviews { get; set; }
 
 
 
@@ -83,7 +84,22 @@ namespace Fermetta.Data
             builder.Entity<WishlistItem>()
                 .HasIndex(w => new { w.UserId, w.Product_Id })
                 .IsUnique();
+            // Reguli pt review
+            builder.Entity<ProductReview>()
+                .HasIndex(r => new { r.Product_Id, r.UserId })
+                .IsUnique();
 
+            builder.Entity<ProductReview>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.Product_Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ProductReview>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

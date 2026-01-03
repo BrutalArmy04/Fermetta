@@ -1,11 +1,12 @@
 ﻿using Fermetta.Data;
 using Fermetta.Models;
+using Fermetta.Models.ViewModels; // aici trebuie sa fie ProductDetails
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,10 +15,12 @@ namespace Fermetta.Controllers
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Products
@@ -31,23 +34,87 @@ namespace Fermetta.Controllers
             return View(products);
         }
 
-        // GET: Products/Details/5
+        // GET: Products/Details/5 (cu review-uri)
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var product = await _context.Products
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.Product_Id == id);
-            if (product == null)
+
+            if (product == null) return NotFound();
+
+            var reviews = await _context.ProductReviews
+                .Include(r => r.User)
+                .Where(r => r.Product_Id == product.Product_Id)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            var avg = reviews.Count == 0 ? 0 : reviews.Average(r => r.Rating);
+
+            var userId = _userManager.GetUserId(User);
+            bool userHasReviewed = false;
+
+            if (!string.IsNullOrEmpty(userId))
+                userHasReviewed = reviews.Any(r => r.UserId == userId);
+
+            var vm = new ProductDetails
             {
-                return NotFound();
+                Product = product,
+                Reviews = reviews,
+                AverageRating = avg,
+                ReviewsCount = reviews.Count,
+                UserHasReviewed = userHasReviewed
+            };
+
+            return View(vm);
+        }
+
+        // POST: Products/AddReview
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReview(int productId, int rating, string comment)
+        {
+            // validari simple
+            if (rating < 1 || rating > 5)
+                return RedirectToAction(nameof(Details), new { id = productId });
+
+            if (string.IsNullOrWhiteSpace(comment))
+                return RedirectToAction(nameof(Details), new { id = productId });
+
+            if (comment.Length > 1000)
+                comment = comment.Substring(0, 1000);
+
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction(nameof(Details), new { id = productId });
+
+            // daca exista deja => update (altfel intra pe constraint-ul unic)
+            var existing = await _context.ProductReviews
+                .FirstOrDefaultAsync(r => r.Product_Id == productId && r.UserId == userId);
+
+            if (existing != null)
+            {
+                existing.Rating = rating;
+                existing.Comment = comment;
+                existing.CreatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                _context.ProductReviews.Add(new ProductReview
+                {
+                    Product_Id = productId,
+                    UserId = userId,
+                    Rating = rating,
+                    Comment = comment,
+                    CreatedAt = DateTime.UtcNow
+                });
             }
 
-            return View(product);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = productId });
         }
 
         // GET: Products/Create
@@ -59,8 +126,6 @@ namespace Fermetta.Controllers
         }
 
         // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -73,9 +138,7 @@ namespace Fermetta.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-
             ViewData["Category_Id"] = new SelectList(_context.Categories, "Category_Id", "Name", product.Category_Id);
-
             return View(product);
         }
 
@@ -83,33 +146,22 @@ namespace Fermetta.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            ViewData["Category_Id"] = new SelectList(_context.Categories, "Category_Id", "Name", product.Category_Id);
+            if (product == null) return NotFound();
 
+            ViewData["Category_Id"] = new SelectList(_context.Categories, "Category_Id", "Name", product.Category_Id);
             return View(product);
         }
 
         // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Product_Id,Name,Weight,Valability,Price,Stock,Personalised,Category_Id")] Product product)
         {
-            if (id != product.Product_Id)
-            {
-                return NotFound();
-            }
+            if (id != product.Product_Id) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -121,18 +173,14 @@ namespace Fermetta.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ProductExists(product.Product_Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Category_Id"] = new SelectList(_context.Categories, "Category_Id", "Name", product.Category_Id);
 
+            ViewData["Category_Id"] = new SelectList(_context.Categories, "Category_Id", "Name", product.Category_Id);
             return View(product);
         }
 
@@ -140,17 +188,12 @@ namespace Fermetta.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Product_Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+
+            if (product == null) return NotFound();
 
             return View(product);
         }
@@ -204,6 +247,5 @@ namespace Fermetta.Controllers
 
             return View();
         }
-
     }
 }
