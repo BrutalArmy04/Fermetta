@@ -94,6 +94,17 @@
 
                 <div class="col-md-8">
                     <h5 class="mb-3">Product information</h5>
+                    @if (!string.IsNullOrWhiteSpace(Model.Product.Description))
+                    {
+                        <div class="mb-4">
+                            <div class="text-muted small mb-1">
+                                <i class="bi bi-card-text"></i> Description
+                            </div>
+                            <div class="border rounded p-3 bg-light">
+                                @Model.Product.Description
+                            </div>
+                        </div>
+                    }
 
                     <div class="row">
                         <div class="col-sm-6 mb-3">
