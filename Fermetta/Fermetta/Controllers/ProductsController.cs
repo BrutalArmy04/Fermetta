@@ -2,6 +2,7 @@
 using Fermetta.Models;
 using Fermetta.Models.ViewModels; // aici trebuie sa fie ProductDetails
 using Microsoft.AspNetCore.Authorization;
+using Fermetta.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,6 +23,9 @@ namespace Fermetta.Controllers
             _context = context;
             _userManager = userManager;
         }
+
+
+
 
         // GET: Products
         [Authorize(Roles = "Admin")]
@@ -69,6 +73,71 @@ namespace Fermetta.Controllers
             };
 
             return View(vm);
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AskAssistant(
+            int productId,
+            string question,
+            [FromServices] IProductAssistantService assistant)
+        {
+            const string UnknownAnswer = "At the moment we don't have details about this.";
+
+            question = (question ?? "").Trim();
+            if (question.Length < 2)
+                return Json(new { ok = true, answer = "Please write a longer question." });
+
+            if (question.Length > 500)
+                question = question.Substring(0, 500);
+
+            // ensure product exists (avoid logging junk)
+            var exists = await _context.Products.AnyAsync(p => p.Product_Id == productId);
+            if (!exists)
+                return Json(new { ok = false, answer = UnknownAnswer });
+
+            // Ask AI (service uses Product.Description + FAQ)
+            var answer = await assistant.AskAsync(productId, question);
+            if (string.IsNullOrWhiteSpace(answer))
+                answer = UnknownAnswer;
+
+            // log Q/A
+            string? userId = null;
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+                userId = _userManager.GetUserId(User);
+
+            _context.ProductAssistantLogs.Add(new ProductAssistantLog
+            {
+                Product_Id = productId,
+                UserId = userId,
+                Question = question,
+                Answer = answer,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // FAQ logging: create / increment (simple exact match)
+            var existingFaq = await _context.ProductFaqs
+                .FirstOrDefaultAsync(f => f.Product_Id == productId && f.Question == question);
+
+            if (existingFaq == null)
+            {
+                _context.ProductFaqs.Add(new ProductFaq
+                {
+                    Product_Id = productId,
+                    Question = question,
+                    Answer = null,
+                    AskedCount = 1,
+                    LastAskedAt = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                existingFaq.AskedCount += 1;
+                existingFaq.LastAskedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return Json(new { ok = true, answer });
         }
 
         // POST: Products/AddReview

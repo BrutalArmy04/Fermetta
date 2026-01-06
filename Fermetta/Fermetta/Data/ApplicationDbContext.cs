@@ -34,6 +34,8 @@ namespace Fermetta.Data
         public DbSet<ChangeRequest> ChangeRequests { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
+        public DbSet<ProductFaq> ProductFaqs { get; set; }
+        public DbSet<ProductAssistantLog> ProductAssistantLogs { get; set; }
 
 
 

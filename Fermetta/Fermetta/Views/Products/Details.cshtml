@@ -105,6 +105,81 @@
                             </div>
                         </div>
                     }
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-header bg-white">
+                            <strong><i class="bi bi-chat-dots"></i> Product Assistant</strong>
+                            <div class="text-muted small">Ask questions about this product</div>
+                        </div>
+
+                        <div class="card-body" style="max-height: 260px; overflow:auto;" id="pa-messages">
+                            <div class="text-muted small">
+                                Example: “Does it have warranty?” / “Is it suitable for kids?”
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white">
+                            <form id="pa-form" class="m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" id="pa-productId" value="@Model.Product.Product_Id" />
+
+                                <div class="input-group">
+                                    <input class="form-control" id="pa-question" placeholder="Type your question..." />
+                                    <button class="btn btn-success" type="submit">Send</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                        (function () {
+                          const form = document.getElementById("pa-form");
+                          const messages = document.getElementById("pa-messages");
+                          const question = document.getElementById("pa-question");
+                          const productId = document.getElementById("pa-productId");
+
+                          function esc(s){ return (s||"").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+                          function addBubble(text, who) {
+                            const wrap = document.createElement("div");
+                            wrap.className = "mb-2";
+                            wrap.innerHTML = `
+                              <div class="small ${who === 'user' ? 'text-end' : ''}">
+                                <span class="badge ${who === 'user' ? 'bg-secondary' : 'bg-success'}">
+                                  ${who === 'user' ? 'You' : 'AI'}
+                                </span>
+                              </div>
+                              <div class="p-2 rounded ${who === 'user' ? 'bg-light' : 'bg-success text-white'}">
+                                ${esc(text)}
+                              </div>`;
+                            messages.appendChild(wrap);
+                            messages.scrollTop = messages.scrollHeight;
+                          }
+
+                          form.addEventListener("submit", async function(e) {
+                            e.preventDefault();
+                            const q = question.value.trim();
+                            if (q.length < 2) return;
+
+                            addBubble(q, "user");
+                            question.value = "";
+
+                            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                            const resp = await fetch("@Url.Action("AskAssistant", "Products")", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                              body: new URLSearchParams({
+                                __RequestVerificationToken: token,
+                                productId: productId.value,
+                                question: q
+                              })
+                            });
+
+                            const data = await resp.json();
+                            addBubble(data.answer || "At the moment we don't have details about this.", "ai");
+                          });
+                        })();
+                    </script>
 
                     <div class="row">
                         <div class="col-sm-6 mb-3">
