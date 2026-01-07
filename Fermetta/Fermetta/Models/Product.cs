@@ -13,6 +13,10 @@ namespace Fermetta.Models
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
         [Required]
+        [StringLength(1000)]
+        public string? Description { get; set; }
+
+        [Required]
         public int Weight {  get; set; }
 
         [Required]
@@ -28,5 +32,8 @@ namespace Fermetta.Models
         public int Category_Id { get; set; }
         [ForeignKey(nameof(Category_Id))]
         public Category? Category { get; set; }
+
+        public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+
     }
 }

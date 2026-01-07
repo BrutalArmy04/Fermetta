@@ -33,7 +33,16 @@
                     @foreach (var item in Model.OrderItems)
                     {
                         <tr>
-                            <td>@item.Product?.Name</td>
+                            <td>
+                                @if (item.Product != null)
+                                {
+                                    <a asp-controller="Products"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Product.Product_Id">
+                                        @item.Product.Name
+                                    </a>
+                                }
+                            </td>
                             <td>@item.Product?.Category?.Name</td>
                             <td>@item.UnitPrice RON</td>
                             <td>@item.Quantity</td>

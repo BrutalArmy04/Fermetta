@@ -26,6 +26,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<Fermetta.Services.Checkout>();
 
+builder.Services.AddScoped<IProductAssistantService, ProductAssistantService>();
+
 
 var app = builder.Build();
 

@@ -1,7 +1,37 @@
-﻿@model Fermetta.Models.Product
+﻿@model Fermetta.Models.ViewModels.ProductDetails
 
 @{
     ViewData["Title"] = "Product Details";
+}
+@{
+    var backUrl = Context.Request.Headers["Referer"].ToString();
+
+    // fallback safe (nu Index, ca sa nu dea Access Denied)
+    if (string.IsNullOrWhiteSpace(backUrl))
+    {
+        backUrl = Url.Action("Catalog", "Products");
+    }
+}
+@if (User.Identity.IsAuthenticated)
+{
+    <form asp-action="AddReview" asp-controller="Products" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
+
+        <select name="rating" class="form-select">
+            @for (int i = 5; i >= 1; i--)
+            {
+                <option value="@i">@i stele</option>
+            }
+        </select>
+
+        <textarea name="comment" class="form-control" required></textarea>
+
+        <button type="submit" class="btn btn-primary mt-2">
+            Trimite review
+        </button>
+    </form>
 }
 
 <div class="container py-4">
@@ -10,15 +40,15 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <h3 class="text-success mb-1">
-                        <i class="bi bi-info-circle"></i> @Model.Name
+                        <i class="bi bi-info-circle"></i> @Model.Product.Name
                     </h3>
                     <div class="text-muted small">
-                        Product ID: @Model.Product_Id
+                        Product ID: @Model.Product.Product_Id
                     </div>
                 </div>
 
                 <div class="text-end">
-                    @if (Model.Stock > 0)
+                    @if (Model.Product.Stock > 0)
                     {
                         <span class="badge bg-success">In stock</span>
                     }
@@ -27,7 +57,7 @@
                         <span class="badge bg-danger">Out of stock</span>
                     }
 
-                    @if (Model.Personalised)
+                    @if (Model.Product.Personalised)
                     {
                         <span class="badge bg-warning text-dark ms-2">
                             <i class="bi bi-stars"></i> Personalised
@@ -47,13 +77,14 @@
 
                     <div class="mt-3">
                         <div class="d-grid gap-2">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
+                            <a href="@backUrl" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left"></i> Back to list
                             </a>
 
+
                             @if (User.IsInRole("Admin"))
                             {
-                                <a asp-action="Edit" asp-route-id="@Model.Product_Id" class="btn btn-outline-success">
+                                <a asp-action="Edit" asp-route-id="@Model.Product.Product_Id" class="btn btn-outline-success">
                                     <i class="bi bi-pencil-square"></i> Edit
                                 </a>
                             }
@@ -63,32 +94,118 @@
 
                 <div class="col-md-8">
                     <h5 class="mb-3">Product information</h5>
+                    @if (!string.IsNullOrWhiteSpace(Model.Product.Description))
+                    {
+                        <div class="mb-4">
+                            <div class="text-muted small mb-1">
+                                <i class="bi bi-card-text"></i> Description
+                            </div>
+                            <div class="border rounded p-3 bg-light">
+                                @Model.Product.Description
+                            </div>
+                        </div>
+                    }
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-header bg-white">
+                            <strong><i class="bi bi-chat-dots"></i> Product Assistant</strong>
+                            <div class="text-muted small">Ask questions about this product</div>
+                        </div>
+
+                        <div class="card-body" style="max-height: 260px; overflow:auto;" id="pa-messages">
+                            <div class="text-muted small">
+                                Example: “Does it have warranty?” / “Is it suitable for kids?”
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white">
+                            <form id="pa-form" class="m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" id="pa-productId" value="@Model.Product.Product_Id" />
+
+                                <div class="input-group">
+                                    <input class="form-control" id="pa-question" placeholder="Type your question..." />
+                                    <button class="btn btn-success" type="submit">Send</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                        (function () {
+                          const form = document.getElementById("pa-form");
+                          const messages = document.getElementById("pa-messages");
+                          const question = document.getElementById("pa-question");
+                          const productId = document.getElementById("pa-productId");
+
+                          function esc(s){ return (s||"").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+                          function addBubble(text, who) {
+                            const wrap = document.createElement("div");
+                            wrap.className = "mb-2";
+                            wrap.innerHTML = `
+                              <div class="small ${who === 'user' ? 'text-end' : ''}">
+                                <span class="badge ${who === 'user' ? 'bg-secondary' : 'bg-success'}">
+                                  ${who === 'user' ? 'You' : 'AI'}
+                                </span>
+                              </div>
+                              <div class="p-2 rounded ${who === 'user' ? 'bg-light' : 'bg-success text-white'}">
+                                ${esc(text)}
+                              </div>`;
+                            messages.appendChild(wrap);
+                            messages.scrollTop = messages.scrollHeight;
+                          }
+
+                          form.addEventListener("submit", async function(e) {
+                            e.preventDefault();
+                            const q = question.value.trim();
+                            if (q.length < 2) return;
+
+                            addBubble(q, "user");
+                            question.value = "";
+
+                            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                            const resp = await fetch("@Url.Action("AskAssistant", "Products")", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                              body: new URLSearchParams({
+                                __RequestVerificationToken: token,
+                                productId: productId.value,
+                                question: q
+                              })
+                            });
+
+                            const data = await resp.json();
+                            addBubble(data.answer || "At the moment we don't have details about this.", "ai");
+                          });
+                        })();
+                    </script>
 
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-currency-exchange"></i> Price</div>
-                            <div class="fs-5 fw-bold text-success">@Model.Price lei</div>
+                            <div class="fs-5 fw-bold text-success">@Model.Product.Price lei</div>
                         </div>
 
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-box-seam"></i> Stock</div>
-                            <div class="fs-5 fw-semibold">@Model.Stock</div>
+                            <div class="fs-5 fw-semibold">@Model.Product.Stock</div>
                         </div>
 
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-speedometer2"></i> Weight</div>
-                            <div class="fw-semibold">@Model.Weight</div>
+                            <div class="fw-semibold">@Model.Product.Weight</div>
                         </div>
 
                         <div class="col-sm-6 mb-3">
                             <div class="text-muted small"><i class="bi bi-calendar-check"></i> Valability</div>
-                            <div class="fw-semibold">@Model.Valability</div>
+                            <div class="fw-semibold">@Model.Product.Valability</div>
                         </div>
 
                         <div class="col-sm-12 mb-1">
                             <div class="text-muted small"><i class="bi bi-tag"></i> Category</div>
                             <div class="fw-semibold">
-                                @(Model.Category != null ? Model.Category.Name : "—")
+                                @(Model.Product.Category != null ? Model.Product.Category.Name : "—")
                             </div>
                         </div>
                     </div>
@@ -103,7 +220,7 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
                         {
                             <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="m-0">
-                                <input type="hidden" name="productId" value="@Model.Product_Id" />
+                                <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
                                 <button type="submit" class="btn btn-outline-success">
                                     <i class="bi bi-cart-plus"></i> Add to Cart
                                 </button>

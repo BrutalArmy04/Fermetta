@@ -1,0 +1,157 @@
+﻿@model Fermetta.Models.ViewModels.ChangeRequests.ChangeRequestReview
+
+@{
+    ViewData["Title"] = "Review request";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<div class="mb-3">
+    <strong>Tip:</strong> @Model.Type |
+    <strong>Acțiune:</strong> @Model.RequestAction |
+    <strong>Status:</strong> @Model.Status
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ContributorNote))
+{
+    <div class="alert alert-secondary">
+        <strong>Note:</strong> @Model.ContributorNote
+    </div>
+}
+
+<form asp-action="SaveDraft" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Propunerea editorului</h5>
+
+            @if (Model.Type == Fermetta.Models.ChangeRequests.ChangeRequestType.Category)
+            {
+                <div class="mb-2"><strong>Name:</strong> @Model.ProposedCategoryName</div>
+                <div class="mb-2"><strong>Description:</strong> @Model.ProposedCategoryDescription</div>
+                <div class="mb-2"><strong>Disponibility:</strong> @Model.ProposedCategoryDisponibility</div>
+            }
+            else
+            {
+                <div class="mb-2"><strong>Name:</strong> @Model.ProposedProductName</div>
+                <div class="mb-2"><strong>Weight:</strong> @Model.ProposedWeight</div>
+                <div class="mb-2"><strong>Valability:</strong> @(Model.ProposedValability?.ToString("yyyy-MM-dd"))</div>
+                <div class="mb-2"><strong>Price:</strong> @Model.ProposedPrice</div>
+                <div class="mb-2"><strong>Stock:</strong> @Model.ProposedStock</div>
+                <div class="mb-2"><strong>Personalised:</strong> @Model.ProposedPersonalised</div>
+                <div class="mb-2"><strong>Category_Id:</strong> @Model.ProposedCategory_Id</div>
+            }
+        </div>
+
+        <!-- DRAFT -->
+        <div class="col-md-6">
+            <h5>Draft admin (editabil)</h5>
+
+            @if (Model.Type == Fermetta.Models.ChangeRequests.ChangeRequestType.Category)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="DraftCategoryName" class="form-label"></label>
+                    <input asp-for="DraftCategoryName" class="form-control" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DraftCategoryDescription" class="form-label"></label>
+                    <textarea asp-for="DraftCategoryDescription" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="DraftCategoryDisponibility" class="form-check-input" />
+                    <label asp-for="DraftCategoryDisponibility" class="form-check-label">Disponibility</label>
+                </div>
+            }
+            else
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="DraftProductName" class="form-label"></label>
+                    <input asp-for="DraftProductName" class="form-control" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DraftWeight" class="form-label"></label>
+                    <input asp-for="DraftWeight" class="form-control" type="number" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DraftValability" class="form-label"></label>
+                    <input asp-for="DraftValability" class="form-control" type="date" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DraftPrice" class="form-label"></label>
+                    <input asp-for="DraftPrice" class="form-control" type="number" step="0.01" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DraftStock" class="form-label"></label>
+                    <input asp-for="DraftStock" class="form-control" type="number" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="DraftPersonalised" class="form-check-input" />
+                    <label asp-for="DraftPersonalised" class="form-check-label">Personalised</label>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DraftCategory_Id" class="form-label">Categorie</label>
+                    <select asp-for="DraftCategory_Id" class="form-control">
+                        <option value="">-- Select Category --</option>
+                        @if (Model.Categories != null)
+                        {
+                            foreach (var c in Model.Categories)
+                            {
+                                <option value="@c.Item1">@c.Item2</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+
+            <div class="form-group mb-3">
+                <label asp-for="AdminNote" class="form-label">Admin note (optional)</label>
+                <textarea asp-for="AdminNote" class="form-control" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-warning">Save Draft</button>
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<div class="d-flex gap-2">
+    <form asp-action="CancelDraft" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-secondary">Cancel (reset draft)</button>
+    </form>
+
+    <form asp-action="Accept" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-success">Accept</button>
+    </form>
+
+    <form asp-action="Decline" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-danger">Decline</button>
+    </form>
+
+    <a class="btn btn-outline-primary ms-auto" asp-action="Inbox">Back to Inbox</a>
+</div>
