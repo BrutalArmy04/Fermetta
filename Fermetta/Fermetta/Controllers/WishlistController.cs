@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Fermetta.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User,Contribuitor")]
     public class WishlistController : Controller
     {
         private readonly ApplicationDbContext _db;

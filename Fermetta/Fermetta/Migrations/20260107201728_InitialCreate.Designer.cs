@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Fermetta.Data.Migrations
+namespace Fermetta.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260103143719_ChangeRequests")]
-    partial class ChangeRequests
+    [Migration("20260107201728_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -182,6 +182,9 @@ namespace Fermetta.Data.Migrations
                     b.Property<bool>("Disponibility")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -317,6 +320,14 @@ namespace Fermetta.Data.Migrations
                     b.Property<int>("Category_Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -344,6 +355,107 @@ namespace Fermetta.Data.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("Fermetta.Models.ProductAssistantLog", b =>
+                {
+                    b.Property<int>("ProductAssistantLog_Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductAssistantLog_Id"));
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Product_Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductAssistantLog_Id");
+
+                    b.ToTable("ProductAssistantLogs");
+                });
+
+            modelBuilder.Entity("Fermetta.Models.ProductFaq", b =>
+                {
+                    b.Property<int>("ProductFaq_Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductFaq_Id"));
+
+                    b.Property<string>("Answer")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("AskedCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastAskedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Product_Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("ProductFaq_Id");
+
+                    b.HasIndex("Product_Id");
+
+                    b.ToTable("ProductFaqs");
+                });
+
+            modelBuilder.Entity("Fermetta.Models.ProductReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Product_Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Product_Id", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ProductReviews");
+                });
+
             modelBuilder.Entity("Fermetta.Models.ShoppingCart", b =>
                 {
                     b.Property<int>("Id")
@@ -362,6 +474,34 @@ namespace Fermetta.Data.Migrations
                         .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("ShoppingCarts");
+                });
+
+            modelBuilder.Entity("Fermetta.Models.WishlistItem", b =>
+                {
+                    b.Property<int>("WishlistItem_Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WishlistItem_Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Product_Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("WishlistItem_Id");
+
+                    b.HasIndex("Product_Id");
+
+                    b.HasIndex("UserId", "Product_Id")
+                        .IsUnique();
+
+                    b.ToTable("WishlistItems");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -570,6 +710,36 @@ namespace Fermetta.Data.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("Fermetta.Models.ProductFaq", b =>
+                {
+                    b.HasOne("Fermetta.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("Product_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Fermetta.Models.ProductReview", b =>
+                {
+                    b.HasOne("Fermetta.Models.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("Product_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fermetta.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Fermetta.Models.ShoppingCart", b =>
                 {
                     b.HasOne("Fermetta.Models.ApplicationUser", "User")
@@ -577,6 +747,17 @@ namespace Fermetta.Data.Migrations
                         .HasForeignKey("Fermetta.Models.ShoppingCart", "UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Fermetta.Models.WishlistItem", b =>
+                {
+                    b.HasOne("Fermetta.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("Product_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -643,6 +824,11 @@ namespace Fermetta.Data.Migrations
             modelBuilder.Entity("Fermetta.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Fermetta.Models.Product", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Fermetta.Models.ShoppingCart", b =>

@@ -42,7 +42,10 @@ namespace Fermetta.Models.ViewModels.ChangeRequests
         public bool DraftPersonalised { get; set; }
         public int? DraftCategory_Id { get; set; }
 
-        
+        public string? DraftImagePath { get; set; }
+        public string? ProposedImagePath { get; set; }
+        public string? ProposedProductDescription { get; set; }
+        public string? DraftProductDescription { get; set; }
         public IEnumerable<(int Id, string Name)>? Categories { get; set; }
     }
 }

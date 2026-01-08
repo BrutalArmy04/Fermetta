@@ -15,7 +15,6 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
-<!-- LOAD (GET) - shown only for Update -->
 <form asp-action="Load" method="get" class="mb-4" id="loadForm">
     <div class="row">
         <div class="col-md-4">
@@ -76,11 +75,9 @@
     </small>
 </form>
 
-<!-- SUBMIT (POST) -->
-<form asp-action="Create" method="post" id="submitForm">
+<form asp-action="Create" method="post" id="submitForm" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
-    <!-- keep selection after Load -->
     <input type="hidden" asp-for="Type" id="hiddenType" />
     <input type="hidden" asp-for="RequestAction" id="hiddenAction" />
     <input type="hidden" asp-for="TargetCategoryId" />
@@ -103,7 +100,6 @@
 
         <div class="col-md-6">
 
-            <!-- CATEGORY fields -->
             <div id="categoryFields">
                 <h5>Category details</h5>
 
@@ -125,7 +121,6 @@
                 </div>
             </div>
 
-            <!-- PRODUCT fields -->
             <div id="productFields">
                 <h5>Product details</h5>
 
@@ -135,6 +130,26 @@
                     <span asp-validation-for="ProductName" class="text-danger"></span>
                 </div>
 
+                <div class="form-group mb-3">
+                    <label asp-for="ProductDescription" class="form-label">Description</label>
+                    <textarea asp-for="ProductDescription" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="ImageFile" class="form-label">Product Image</label>
+
+                    @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                    {
+                        <div class="mb-2 p-2 border rounded bg-light">
+                            <img src="@Model.ExistingImagePath" style="height: 100px; width: auto; object-fit: contain;" class="img-thumbnail" />
+                            <input type="hidden" asp-for="ExistingImagePath" />
+                            <div class="text-muted small mt-1">Current image. Upload a new one to replace it.</div>
+                        </div>
+                    }
+
+                    <input asp-for="ImageFile" class="form-control" type="file" accept=".png,.jpg,.jpeg,.gif" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
                 <div class="form-group mb-3">
                     <label asp-for="Weight" class="form-label">Weight</label>
                     <input asp-for="Weight" class="form-control" type="number" />
@@ -191,8 +206,8 @@
 
     <script>
         function applyVisibility() {
-            var type = document.getElementById("crType").value;      // "1" Category, "2" Product
-            var action = document.getElementById("crAction").value;  // "1" Create, "2" Update
+            var type = document.getElementById("crType").value; // "1" Category, "2" Product
+            var action = document.getElementById("crAction").value; // "1" Create, "2" Update
 
             // keep POST hidden values in sync
             document.getElementById("hiddenType").value = type;

@@ -41,5 +41,6 @@ namespace Fermetta.Models.ChangeRequests
 
         public string? ReviewedByUserId { get; set; }
         public DateTime? ReviewedAt { get; set; }
+
     }
 }

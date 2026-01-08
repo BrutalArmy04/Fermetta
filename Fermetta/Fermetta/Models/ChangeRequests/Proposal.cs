@@ -18,5 +18,7 @@ namespace Fermetta.Models.ChangeRequests
         public int Stock { get; set; }
         public bool Personalised { get; set; }
         public int Category_Id { get; set; }
+        public string? ImagePath { get; set; }
+        public string? Description { get; set; }
     }
 }

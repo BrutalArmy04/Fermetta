@@ -14,8 +14,9 @@
         </div>
 
         <div class="card-body">
-            <form asp-action="Edit" method="post">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Category_Id" />
+                <input type="hidden" asp-for="ImagePath" />
 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -31,6 +32,27 @@
                             <label class="form-check-label" asp-for="Disponibility">
                                 Category is available
                             </label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Category Image</label>
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <img src="@Model.ImagePath" alt="Current Image" class="img-thumbnail" style="height: 100px; width: 100px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center border rounded" style="height: 100px; width: 100px;">
+                                    <span class="text-muted small">No Image</span>
+                                </div>
+                            }
+                            <div class="flex-grow-1">
+                                <input asp-for="ImageFile" class="form-control" type="file" accept=".png,.jpg,.jpeg,.gif" />
+                                <div class="form-text">Leave empty to keep current image.</div>
+                                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                            </div>
                         </div>
                     </div>
 

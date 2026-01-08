@@ -46,11 +46,11 @@ namespace Fermetta.Controllers
             if (user == null) return Challenge();
 
             var product = await _context.Products.FindAsync(productId);
-            if (product == null) return NotFound("Produsul nu a fost găsit.");
+            if (product == null) return NotFound("Product was not found.");
 
             if (product.Stock <= 0)
             {
-                TempData["Error"] = $"Ne pare rău, produsul '{product.Name}' nu mai este pe stoc.";
+                TempData["Error"] = $"Product '{product.Name}' is out of stock.";
                 return RedirectToAction("Catalog", "Products");
             }
 
@@ -72,7 +72,7 @@ namespace Fermetta.Controllers
 
             if (newQty > product.Stock)
             {
-                TempData["Error"] = $"Nu puteți adăuga mai mult. Stoc maxim disponibil: {product.Stock}.";
+                TempData["Error"] = $"Insufficient Stock. Max amount: {product.Stock}.";
                 return RedirectToAction("Catalog", "Products");
             }
 
@@ -93,7 +93,7 @@ namespace Fermetta.Controllers
             }
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = "Produs adăugat în coș!";
+            TempData["Message"] = "Product added to cart!";
 
             return RedirectToAction("Catalog", "Products");
         }
@@ -117,11 +117,11 @@ namespace Fermetta.Controllers
                 {
                     if (quantity < 1)
                     {
-                        TempData["Error"] = "Cantitatea minimă este 1.";
+                        TempData["Error"] = "Minimum amount is 1.";
                     }
                     else if (quantity > cartItem.Product.Stock)
                     {
-                        TempData["Error"] = $"Stoc insuficient! Disponibil doar: {cartItem.Product.Stock} bucăți.";
+                        TempData["Error"] = $"Insufficient stock. Max amount: {cartItem.Product.Stock}.";
                         cartItem.Quantity = cartItem.Product.Stock;
                         _context.Update(cartItem);
                         await _context.SaveChangesAsync();
@@ -131,7 +131,7 @@ namespace Fermetta.Controllers
                         cartItem.Quantity = quantity;
                         _context.Update(cartItem);
                         await _context.SaveChangesAsync();
-                        TempData["Message"] = "Coș actualizat!";
+                        TempData["Message"] = "Cart Updated!";
                     }
                 }
             }

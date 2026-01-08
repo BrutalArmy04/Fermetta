@@ -1,54 +1,40 @@
 ﻿@model Fermetta.Models.Product
-
 @{
     ViewData["Title"] = "Create";
 }
 
 <h1>Create</h1>
-
 <h4>Product</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Weight" class="control-label"></label>
-                <input asp-for="Weight" class="form-control" />
-                <span asp-validation-for="Weight" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Valability" class="control-label"></label>
-                <input asp-for="Valability" class="form-control" type="date" />
-                <span asp-validation-for="Valability" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageFile" class="control-label">Image</label>
+                <input asp-for="ImageFile" class="form-control" type="file" accept=".png,.jpg,.jpeg,.gif" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Stock" class="control-label"></label>
-                <input asp-for="Stock" class="form-control" />
-                <span asp-validation-for="Stock" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Personalised" /> @Html.DisplayNameFor(model => model.Personalised)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="Category_Id" class="control-label"></label>
-                <select asp-for="Category_Id" class="form-control" asp-items="ViewBag.Category_Id">
-                    <option value="0">-- Selectează categoria --</option>
-                </select>
-                <span asp-validation-for="Category_Id" class="text-danger"></span>
-            </div>
+
+            <div class="form-group mb-3"><label asp-for="Weight" class="control-label"></label><input asp-for="Weight" class="form-control" /><span asp-validation-for="Weight" class="text-danger"></span></div>
+            <div class="form-group mb-3"><label asp-for="Valability" class="control-label"></label><input asp-for="Valability" class="form-control" type="date" /><span asp-validation-for="Valability" class="text-danger"></span></div>
+            <div class="form-group mb-3"><label asp-for="Price" class="control-label"></label><input asp-for="Price" class="form-control" /><span asp-validation-for="Price" class="text-danger"></span></div>
+            <div class="form-group mb-3"><label asp-for="Stock" class="control-label"></label><input asp-for="Stock" class="form-control" /><span asp-validation-for="Stock" class="text-danger"></span></div>
+            <div class="form-group form-check mb-3"><label class="form-check-label"><input class="form-check-input" asp-for="Personalised" /> @Html.DisplayNameFor(model => model.Personalised)</label></div>
+            <div class="form-group mb-3"><label asp-for="Category_Id" class="control-label"></label><select asp-for="Category_Id" class="form-control" asp-items="ViewBag.Category_Id"><option value="0">Select Category</option></select><span asp-validation-for="Category_Id" class="text-danger"></span></div>
 
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -56,11 +42,10 @@
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+<div><a asp-action="Index">Back to List</a></div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
 }

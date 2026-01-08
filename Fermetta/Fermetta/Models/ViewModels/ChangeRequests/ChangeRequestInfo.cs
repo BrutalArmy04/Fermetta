@@ -25,6 +25,7 @@ namespace Fermetta.Models.ViewModels.ChangeRequests
         // product 
         [StringLength(100)]
         public string? ProductName { get; set; }
+        public string? ProductDescription { get; set; }
         public int? Weight { get; set; }
         public DateTime? Valability { get; set; }
         public decimal? Price { get; set; }
@@ -38,5 +39,11 @@ namespace Fermetta.Models.ViewModels.ChangeRequests
         // Dropdown data (pentru Update + pentru select categoria produsului)
         public IEnumerable<(int Id, string Name)>? Categories { get; set; }
         public IEnumerable<(int Id, string Name)>? Products { get; set; }
+
+        public IFormFile? ImageFile { get; set; }
+
+        public string? ExistingImagePath { get; set; }
+        public string? ProposedProductDescription { get; set; }
+        public string? DraftProductDescription { get; set; }
     }
 }

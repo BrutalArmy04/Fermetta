@@ -15,30 +15,13 @@ namespace Fermetta.Models
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                // ----------------------------
-                // 1) ROLES + USERS (doar dacă NU există)
-                // ----------------------------
+                // 1) Roles + Users
                 if (!context.Roles.Any())
                 {
                     context.Roles.AddRange(
-                        new IdentityRole
-                        {
-                            Id = "1",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new IdentityRole
-                        {
-                            Id = "2",
-                            Name = "Editor",
-                            NormalizedName = "EDITOR"
-                        },
-                        new IdentityRole
-                        {
-                            Id = "3",
-                            Name = "User",
-                            NormalizedName = "USER"
-                        }
+                        new IdentityRole { Id = "1", Name = "Admin", NormalizedName = "ADMIN" },
+                        new IdentityRole { Id = "2", Name = "Contribuitor", NormalizedName = "CONTRIBUITOR" },
+                        new IdentityRole { Id = "3", Name = "User", NormalizedName = "USER" }
                     );
 
                     var hasher = new PasswordHasher<ApplicationUser>();
@@ -60,36 +43,50 @@ namespace Fermetta.Models
                     };
                     admin.PasswordHash = hasher.HashPassword(admin, "Admin1!");
 
-                    var editor = new ApplicationUser
+                    var contrib = new ApplicationUser
                     {
-                        Id = "editor-id",
-                        UserName = "editor@test.com",
-                        Email = "editor@test.com",
-                        NormalizedUserName = "EDITOR@TEST.COM",
-                        NormalizedEmail = "EDITOR@TEST.COM",
+                        Id = "contrib-id",
+                        UserName = "contrib@test.com",
+                        Email = "contrib@test.com",
+                        NormalizedUserName = "CONTRIB@TEST.COM",
+                        NormalizedEmail = "CONTRIB@TEST.COM",
                         EmailConfirmed = true,
                         FirstName = "Content",
-                        LastName = "Editor",
+                        LastName = "Contributor",
                         RegistrationDate = DateTime.Now,
                         Status = "Active",
                         LastAuthentiationDate = DateTime.Now,
                         AllRoles = Enumerable.Empty<SelectListItem>()
                     };
-                    editor.PasswordHash = hasher.HashPassword(editor, "Editor1!");
+                    contrib.PasswordHash = hasher.HashPassword(contrib, "Contrib1!");
 
-                    context.Users.AddRange(admin, editor);
+                    var user = new ApplicationUser
+                    {
+                        Id = "user-id",
+                        UserName = "user@test.com",
+                        Email = "user@test.com",
+                        NormalizedUserName = "USER@TEST.COM",
+                        NormalizedEmail = "USER@TEST.COM",
+                        EmailConfirmed = true,
+                        FirstName = "Standard",
+                        LastName = "User",
+                        RegistrationDate = DateTime.Now,
+                        Status = "Active",
+                        LastAuthentiationDate = DateTime.Now,
+                        AllRoles = Enumerable.Empty<SelectListItem>()
+                    };
+                    user.PasswordHash = hasher.HashPassword(user, "User1!");
 
+                    context.Users.AddRange(admin, contrib, user);
                     context.UserRoles.AddRange(
                         new IdentityUserRole<string> { UserId = admin.Id, RoleId = "1" },
-                        new IdentityUserRole<string> { UserId = editor.Id, RoleId = "2" }
+                        new IdentityUserRole<string> { UserId = contrib.Id, RoleId = "2" },
+                        new IdentityUserRole<string> { UserId = user.Id, RoleId = "3" }
                     );
-
                     context.SaveChanges();
                 }
 
-                // ----------------------------
-                // 2) CATEGORIES (doar dacă NU există)
-                // ----------------------------
+                // 2) Categories
                 if (!context.Categories.Any())
                 {
                     context.Categories.AddRange(
@@ -97,29 +94,27 @@ namespace Fermetta.Models
                         {
                             Name = "Dairy",
                             Description = "Products made from fresh cow and goat milk.",
-                            Disponibility = true
+                            Disponibility = true,
+                            ImagePath = "/images/categories/dairy.jpg"
                         },
                         new Category
                         {
                             Name = "Vegetables",
                             Description = "Seasonal vegetables, naturally grown on the farm.",
-                            Disponibility = true
+                            Disponibility = true,
+                            ImagePath = "/images/categories/vegetables.jpg"
                         },
                         new Category
                         {
                             Name = "Flowers",
                             Description = "Bouquets and potted seasonal flowers.",
-                            Disponibility = true
+                            Disponibility = true,
+                            ImagePath = "/images/categories/flowers.jpg"
                         }
                     );
-
                     context.SaveChanges();
                 }
-
-                // ----------------------------
-                // 3) PRODUCTS (doar dacă NU există)
-                // ----------------------------
-                
+                // 3) Products
                 if (!context.Products.Any())
                 {
                     var dairyId = context.Categories.First(c => c.Name == "Dairy").Category_Id;
@@ -135,7 +130,8 @@ namespace Fermetta.Models
                             Valability = DateTime.Now.AddDays(7),
                             Price = 9,
                             Stock = 40,
-                            Category_Id = dairyId
+                            Category_Id = dairyId,
+                            ImagePath = "/images/products/yoghurt.jpg"
                         },
                         new Product
                         {
@@ -145,7 +141,8 @@ namespace Fermetta.Models
                             Valability = DateTime.Now.AddDays(5),
                             Price = 15,
                             Stock = 100,
-                            Category_Id = vegId
+                            Category_Id = vegId,
+                            ImagePath = "/images/products/tomatoes.jpg"
                         },
                         new Product
                         {
@@ -156,13 +153,13 @@ namespace Fermetta.Models
                             Price = 55,
                             Stock = 25,
                             Personalised = true,
-                            Category_Id = flowerId
+                            Category_Id = flowerId,
+                            ImagePath = "/images/products/tulips.jpg"
                         }
                     );
-                
+
                     context.SaveChanges();
                 }
-                
             }
         }
     }

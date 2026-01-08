@@ -34,11 +34,19 @@
             <div class="col">
                 <div class="card h-100 shadow-sm">
 
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted"
-                         style="height: 140px;">
-                        <span class="fs-1">🌿</span>
-                    </div>
-
+                    @if (!string.IsNullOrEmpty(p.ImagePath))
+                    {
+                        <div class="card-img-top d-flex align-items-center justify-content-center bg-white" style="height: 140px; overflow:hidden;">
+                            <img src="@p.ImagePath" alt="@p.Name" style="height: 100%; width: 100%; object-fit: cover;">
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted"
+                             style="height: 140px;">
+                            <span class="fs-1">🌿</span>
+                        </div>
+                    }
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <h5 class="card-title mb-1">@p.Name</h5>
@@ -83,7 +91,7 @@
                             <div class="small text-muted">
                                 <i class="bi bi-calendar-check"></i>
                                 Valability:
-                                <span class="text-dark">@p.Valability</span>
+                                <span class="text-dark">@p.Valability.ToString("dd.MM.yyyy")</span>
                             </div>
 
                             @if (p.Personalised)
@@ -96,7 +104,7 @@
                             }
                         </div>
                     </div>
-                    
+
 
                     <div class="card-footer bg-white border-top-0">
                         <div class="d-grid gap-2">
