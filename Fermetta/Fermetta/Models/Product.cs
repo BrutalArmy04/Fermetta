@@ -38,10 +38,10 @@ namespace Fermetta.Models
 
         // partea cu imagini
 
-        // Aceasta va stoca calea către imagine în Baza de Date (ex: "/images/products/poza1.jpg")
+        //  va stoca calea catre imagine in Baza de Date (ex: "/images/products/poza1.jpg")
         public string? ImagePath { get; set; }
 
-        // Aceasta nu ajunge în baza de date, este doar pentru a transporta fișierul din formular în Controller
+        //  nu ajunge in baza de date, este doar pentru a transporta fisierul din formular in controller
         [NotMapped]
         public IFormFile? ImageFile { get; set; }
 

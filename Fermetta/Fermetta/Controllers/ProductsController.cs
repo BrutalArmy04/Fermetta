@@ -220,13 +220,19 @@ namespace Fermetta.Controllers
         }
 
         // CATALOG (Paginare)
-        public IActionResult Catalog()
+        public IActionResult Catalog(int? categoryId)
         {
-            int _perPage = 6; // Poți schimba în 3 pentru testare dacă ai puține produse
+            int _perPage = 6;
 
             var products = _context.Products
                 .Include("Category")
-                .OrderBy(p => p.Name);
+                .AsQueryable();
+
+            // partea pentru produsele ce apartin unei categorii
+            if (categoryId != null)
+            {
+                products = products.Where(p => p.Category_Id == categoryId);
+            }
 
             int totalItems = products.Count();
             var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
@@ -237,8 +243,15 @@ namespace Fermetta.Controllers
 
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
             ViewBag.Products = paginatedProducts;
-            ViewBag.PaginationBaseUrl = "/Products/Catalog/?page";
 
+            if(categoryId != null)
+            {
+                ViewBag.PaginationBaseUrl = "/Products/Catalog?categoryId=" + categoryId + "&page=";
+            }
+            else
+                ViewBag.PaginationBaseUrl = "/Products/Catalog/?page";
+
+            ViewBag.CategoryId = categoryId;
             return View();
         }
 
