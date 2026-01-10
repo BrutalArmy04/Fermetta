@@ -392,15 +392,15 @@ namespace Fermetta.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult RequireLogin(int productId, string intent)
+        public IActionResult RequireLogin(int productId, string intent, string returnUrl)
         {
             TempData["Message"] = "To continue, please sign up or log in.";
-            string resumeUrl = Url.Action("ResumeIntent", "Products", new { productId = productId, intent = intent });
+            string resumeUrl = Url.Action("ResumeIntent", "Products", new { productId = productId, intent = intent, returnUrl });
             return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = resumeUrl });
         }
 
         [Authorize]
-        public async Task<IActionResult> ResumeIntent(int productId, string intent, int quantity = 1)
+        public async Task<IActionResult> ResumeIntent(int productId, string intent, int quantity = 1, string returnUrl = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction(nameof(Index));
@@ -454,7 +454,8 @@ namespace Fermetta.Controllers
                     TempData["Message"] = "Product was already in the wishlist.";
                 }
             }
-
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
             return RedirectToAction(nameof(Catalog));
         }
     }

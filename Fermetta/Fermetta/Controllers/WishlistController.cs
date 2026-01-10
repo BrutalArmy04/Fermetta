@@ -41,7 +41,7 @@ namespace Fermetta.Controllers
         // POST: /Wishlist/Add
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(int id) // id = Product_Id
+        public async Task<IActionResult> Add(int id, string returnUrl = null) // id = Product_Id
         {
             var userId = _userManager.GetUserId(User);
 
@@ -65,9 +65,9 @@ namespace Fermetta.Controllers
                 TempData["Message"] = "This product is already in your wishlist.";
             }
 
-            // te întorci de unde ai venit
-            if (Request.Headers.TryGetValue("Referer", out var referer) && !string.IsNullOrWhiteSpace(referer))
-                return Redirect(referer.ToString());
+            //facem ca la shopping cart ca sa pastram filtrele, sa ne intoarcem de unde am venit
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
 
             return RedirectToAction(nameof(Index));
         }

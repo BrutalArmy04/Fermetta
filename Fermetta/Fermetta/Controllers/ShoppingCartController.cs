@@ -7,7 +7,7 @@ using Fermetta.Models;
 
 namespace Fermetta.Controllers
 {
-    [Authorize(Roles = "User,Contributor")]
+    [Authorize(Roles = "User,Contribuitor")]
     public class ShoppingCartController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -40,7 +40,7 @@ namespace Fermetta.Controllers
 
         // Add
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+        public async Task<IActionResult> AddToCart(int productId, int quantity = 1, string returnUrl = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
@@ -50,10 +50,18 @@ namespace Fermetta.Controllers
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return NotFound("Product was not found.");
 
+            IActionResult Back()
+            {
+                if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return LocalRedirect(returnUrl);
+                return RedirectToAction("Catalog", "Products");
+            }
+
+
             if (product.Stock <= 0)
             {
                 TempData["Error"] = $"Product '{product.Name}' is out of stock.";
-                return RedirectToAction("Catalog", "Products");
+                return Back();
             }
 
             var cart = await _context.ShoppingCarts
@@ -77,7 +85,7 @@ namespace Fermetta.Controllers
             {
                 int remaining = product.Stock - currentQty;
                 TempData["Error"] = $"Insufficient Stock. You already have {currentQty} in cart. You can add max {remaining} more.";
-                return RedirectToAction("Catalog", "Products"); 
+                return Back(); 
             }
 
             if (cartItem != null)
@@ -100,7 +108,7 @@ namespace Fermetta.Controllers
             await _context.SaveChangesAsync();
             TempData["Message"] = $"{quantity} x Product added to cart!";
 
-            return RedirectToAction("Catalog", "Products");
+            return Back();
         }
 
         // Edit
