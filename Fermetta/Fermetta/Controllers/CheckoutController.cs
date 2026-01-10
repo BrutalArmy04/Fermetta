@@ -81,7 +81,7 @@ namespace Fermetta.Controllers
                     vm.PaymentMethod
                 );
 
-                TempData["Message"] = "Comanda a fost plasată cu succes!";
+                TempData["Message"] = "Order was successfully placed!";
                 return RedirectToAction("Details", "Orders", new { id = order.OrderId });
             }
             catch (Exception ex)

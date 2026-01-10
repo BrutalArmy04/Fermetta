@@ -40,10 +40,12 @@ namespace Fermetta.Controllers
 
         // Add
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId)
+        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
+
+            if (quantity < 1) quantity = 1;
 
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return NotFound("Product was not found.");
@@ -68,17 +70,20 @@ namespace Fermetta.Controllers
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
 
             int currentQty = cartItem?.Quantity ?? 0;
-            int newQty = currentQty + 1;
+
+            int newQty = currentQty + quantity;
 
             if (newQty > product.Stock)
             {
-                TempData["Error"] = $"Insufficient Stock. Max amount: {product.Stock}.";
-                return RedirectToAction("Catalog", "Products");
+                int remaining = product.Stock - currentQty;
+                TempData["Error"] = $"Insufficient Stock. You already have {currentQty} in cart. You can add max {remaining} more.";
+                return RedirectToAction("Catalog", "Products"); 
             }
 
             if (cartItem != null)
             {
-                cartItem.Quantity++;
+                
+                cartItem.Quantity += quantity;
             }
             else
             {
@@ -86,14 +91,14 @@ namespace Fermetta.Controllers
                 {
                     ShoppingCartId = cart.Id,
                     ProductId = productId,
-                    Quantity = 1,
+                    Quantity = quantity, 
                     Observations = ""
                 };
                 _context.CartItems.Add(cartItem);
             }
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = "Product added to cart!";
+            TempData["Message"] = $"{quantity} x Product added to cart!";
 
             return RedirectToAction("Catalog", "Products");
         }

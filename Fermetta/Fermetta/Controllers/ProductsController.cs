@@ -400,7 +400,7 @@ namespace Fermetta.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> ResumeIntent(int productId, string intent)
+        public async Task<IActionResult> ResumeIntent(int productId, string intent, int quantity = 1)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction(nameof(Index));
@@ -422,11 +422,11 @@ namespace Fermetta.Controllers
 
                 if (cartItem == null)
                 {
-                    _context.CartItems.Add(new CartItem { ShoppingCartId = cart.Id, ProductId = productId, Quantity = 1 });
+                    _context.CartItems.Add(new CartItem { ShoppingCartId = cart.Id, ProductId = productId, Quantity = quantity }); ;
                 }
                 else
                 {
-                    cartItem.Quantity++;
+                    cartItem.Quantity += quantity;
                     _context.Update(cartItem);
                 }
 

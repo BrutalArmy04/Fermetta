@@ -36,7 +36,6 @@
                     }
                     else
                     {
-
                         <span class="badge bg-danger">Out of stock</span>
                     }
 
@@ -89,8 +88,8 @@
                         <div class="col-sm-12"><div class="text-muted small">Category</div><div class="fw-semibold">@(Model.Product.Category != null ? Model.Product.Category.Name : "—")</div></div>
                     </div>
 
-                    <div class="d-flex gap-2 flex-wrap mb-4">
-                        <a asp-controller="Products" asp-action="Catalog" class="btn btn-success">
+                    <div class="d-flex gap-2 flex-wrap mb-4 align-items-center">
+                        <a asp-controller="Products" asp-action="Catalog" class="btn btn-success" style="height: 38px;">
                             <i class="bi bi-grid-3x3-gap"></i> Go to catalog
                         </a>
 
@@ -98,10 +97,16 @@
                         {
                             if (!User.IsInRole("Admin"))
                             {
-                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="m-0">
+                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="d-flex m-0 gap-2">
                                     <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
+
+                                    <div class="input-group" style="width: 140px;">
+                                        <span class="input-group-text bg-white px-2">Qty</span>
+                                        <input type="number" name="quantity" value="1" min="1" max="@Model.Product.Stock" class="form-control text-center" />
+                                    </div>
+
                                     <button type="submit" class="btn btn-outline-success">
-                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                        <i class="bi bi-cart-plus"></i> Add
                                     </button>
                                 </form>
                             }
@@ -153,7 +158,6 @@
                             }
                             else
                             {
-
                                 <span>Leave a review!</span>
                             }
                         </h5>
@@ -207,7 +211,6 @@
                     @foreach (var review in Model.Reviews)
                     {
                         var isMyReview = (currentUser != null && review.UserId == currentUser.Id);
-
                         <div class="list-group-item p-4 mb-3 border rounded shadow-sm @(isMyReview ? "bg-light border-warning" : "")">
                             <div class="d-flex w-100 justify-content-between align-items-center">
                                 <h5 class="mb-1 fw-bold">
@@ -236,7 +239,6 @@
                                     }
                                     else
                                     {
-
                                         <span class="text-muted">&#9734;</span>
                                     }
                                 }
@@ -270,7 +272,6 @@
 </div>
 
 <script>
-    // Scriptul pentru AI Assistant ramane neschimbat
     (function () {
         const form = document.getElementById("pa-form");
         const messages = document.getElementById("pa-messages");
