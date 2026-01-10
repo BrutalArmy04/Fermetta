@@ -1,5 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Products Catalog";
+    // Obținem pagina curentă și ultima pagină din ViewBag
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var lastPage = ViewBag.lastPage as int? ?? 1;
 }
 
 <div class="container py-4">
@@ -13,6 +16,53 @@
 
     <h2 class="mb-4 text-success">Available Products</h2>
 
+    <div class="card mb-4 bg-light border-0">
+        <div class="card-body">
+            <form asp-action="Catalog" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Search Product</label>
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="ex: yoghurt, tuplis etc.." />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Categories</label>
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in ViewBag.Categories)
+                            {
+                                if ((string)ViewData["CurrentCategory"] == cat)
+                                {
+                                    <option value="@cat" selected>@cat</option>
+                                }
+                                else
+                                {
+                                    <option value="@cat">@cat</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Sort</label>
+                    <select name="sortOrder" class="form-select">
+                        <option value="">Default</option>
+                        <!option value="price_asc" @(ViewData["CurrentSort"] as string == "price_asc" ? "selected" : "")>Price Asc</!option>
+                        <!option value="price_desc" @(ViewData["CurrentSort"] as string == "price_desc" ? "selected" : "")>Price Desc</!option>
+                        <!option value="rating_desc" @(ViewData["CurrentSort"] as string == "rating_desc" ? "selected" : "")>Rating Best to Worst</!option>
+                        <!option value="rating_asc" @(ViewData["CurrentSort"] as string == "rating_asc" ? "selected" : "")>Rating Worst to Best</!option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Filter</button>
+                    <a asp-action="Catalog" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var p in ViewBag.Products)
         {
@@ -21,8 +71,7 @@
 
                     @if (!string.IsNullOrEmpty(p.ImagePath))
                     {
-                        <img src="@p.ImagePath" class="card-img-top" alt="@p.Name"
-                             style="height: 200px; object-fit: cover; width: 100%;">
+                        <img src="@p.ImagePath" class="card-img-top" alt="@p.Name" style="height: 200px; object-fit: cover; width: 100%;">
                     }
                     else
                     {
@@ -55,9 +104,13 @@
                                 <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@p.Product_Id" />
-                                    <button type="submit" class="btn btn-outline-success w-100">
-                                        <i class="bi bi-cart-plus"></i> Add to Cart
-                                    </button>
+
+                                    <div class="input-group mb-2">
+                                        <input type="number" name="quantity" value="1" min="1" max="@p.Stock" class="form-control" placeholder="1" aria-label="Quantity">
+                                        <button type="submit" class="btn btn-outline-success">
+                                            <i class="bi bi-cart-plus"></i> Add
+                                        </button>
+                                    </div>
                                 </form>
 
                                 @if (!User.IsInRole("Admin"))
@@ -73,10 +126,17 @@
                             }
                             else
                             {
-                                <a href="@Url.Action("RequireLogin", "Products", new { productId = p.Product_Id, intent = "cart" })"
-                                   class="btn btn-outline-success">
-                                    <i class="bi bi-cart-plus"></i> Add to Cart
-                                </a>
+                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Product_Id" />
+
+                                    <div class="input-group mb-2">
+                                        <input type="number" name="quantity" value="1" min="1" max="@p.Stock" class="form-control" placeholder="1" aria-label="Quantity">
+                                        <button type="submit" class="btn btn-outline-success">
+                                            <i class="bi bi-cart-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </form>
 
                                 <a href="@Url.Action("RequireLogin", "Products", new { productId = p.Product_Id, intent = "wishlist" })"
                                    class="btn btn-outline-secondary">
@@ -93,21 +153,40 @@
     <div class="mt-5 d-flex justify-content-center">
         <nav aria-label="Page navigation example">
             <ul class="pagination">
-                <li class="page-item">
-                    <a class="page-link text-success" href="@ViewBag.PaginationBaseUrl=1" aria-label="Previous">
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link text-success"
+                       asp-action="Catalog"
+                       asp-route-page="@(currentPage - 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-category="@ViewData["CurrentCategory"]"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
 
-                @for (int i = 1; i <= ViewBag.lastPage; i++)
+                @for (int i = 1; i <= lastPage; i++)
                 {
-                    <li class="page-item">
-                        <a class="page-link text-success" href="@ViewBag.PaginationBaseUrl=@i">@i</a>
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link @(i == currentPage ? "bg-success border-success" : "text-success")"
+                           asp-action="Catalog"
+                           asp-route-page="@i"
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           asp-route-category="@ViewData["CurrentCategory"]"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]">
+                            @i
+                        </a>
                     </li>
                 }
 
-                <li class="page-item">
-                    <a class="page-link text-success" href="@ViewBag.PaginationBaseUrl=@(ViewBag.lastPage)" aria-label="Next">
+                <li class="page-item @(currentPage == lastPage ? "disabled" : "")">
+                    <a class="page-link text-success"
+                       asp-action="Catalog"
+                       asp-route-page="@(currentPage + 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-category="@ViewData["CurrentCategory"]"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>

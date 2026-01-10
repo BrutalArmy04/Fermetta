@@ -89,7 +89,6 @@ namespace Fermetta.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Logică Salvare Imagine
                 if (product.ImageFile != null)
                 {
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + product.ImageFile.FileName;
@@ -135,7 +134,6 @@ namespace Fermetta.Controllers
         {
             if (id != product.Product_Id) return NotFound();
 
-            // Recuperăm produsul original pentru a nu pierde imaginea veche
             var existingProduct = await _context.Products
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Product_Id == id);
@@ -144,7 +142,6 @@ namespace Fermetta.Controllers
             {
                 try
                 {
-                    // Logică Actualizare Imagine
                     if (product.ImageFile != null)
                     {
                         string uniqueFileName = Guid.NewGuid().ToString() + "_" + product.ImageFile.FileName;
@@ -161,7 +158,6 @@ namespace Fermetta.Controllers
                     }
                     else
                     {
-                        // Păstrăm imaginea veche dacă nu s-a încărcat una nouă
                         if (existingProduct != null)
                         {
                             product.ImagePath = existingProduct.ImagePath;
@@ -179,7 +175,6 @@ namespace Fermetta.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Restaurăm calea imaginii în caz de eroare de validare
             if (existingProduct != null && string.IsNullOrEmpty(product.ImagePath))
             {
                 product.ImagePath = existingProduct.ImagePath;
@@ -219,39 +214,73 @@ namespace Fermetta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // CATALOG (Paginare)
-        public IActionResult Catalog(int? categoryId)
+        // Filtered Catalog View
+        public async Task<IActionResult> Catalog(string searchString, string category, int? categoryId, string sortOrder, int? page)
         {
-            int _perPage = 6;
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentSort"] = sortOrder;
+
+            if (string.IsNullOrEmpty(category) && categoryId.HasValue)
+            {
+                var cat = await _context.Categories.FindAsync(categoryId.Value);
+                if (cat != null) category = cat.Name;
+            }
+            ViewData["CurrentCategory"] = category;
+
+            ViewBag.Categories = await _context.Categories.Select(c => c.Name).Distinct().ToListAsync();
 
             var products = _context.Products
-                .Include("Category")
+                .Include(p => p.Category)
+                .Include(p => p.Reviews) 
                 .AsQueryable();
 
-            // partea pentru produsele ce apartin unei categorii
-            if (categoryId != null)
+            if (!string.IsNullOrEmpty(category))
+            {
+                products = products.Where(p => p.Category.Name == category);
+            }
+            else if (categoryId.HasValue)
             {
                 products = products.Where(p => p.Category_Id == categoryId);
             }
 
-            int totalItems = products.Count();
-            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
-            var offset = 0;
-            if (!currentPage.Equals(0)) offset = (currentPage - 1) * _perPage;
-
-            var paginatedProducts = products.Skip(offset).Take(_perPage);
-
-            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
-            ViewBag.Products = paginatedProducts;
-
-            if(categoryId != null)
+            if (!string.IsNullOrEmpty(searchString))
             {
-                ViewBag.PaginationBaseUrl = "/Products/Catalog?categoryId=" + categoryId + "&page=";
+                products = products.Where(p => p.Name.Contains(searchString));
             }
-            else
-                ViewBag.PaginationBaseUrl = "/Products/Catalog/?page";
 
-            ViewBag.CategoryId = categoryId;
+            switch (sortOrder)
+            {
+                case "price_asc":
+                    products = products.OrderBy(p => p.Price);
+                    break;
+                case "price_desc":
+                    products = products.OrderByDescending(p => p.Price);
+                    break;
+                case "rating_asc":
+                    products = products.OrderBy(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0);
+                    break;
+                case "rating_desc":
+                    products = products.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Name); 
+                    break;
+            }
+
+            int _perPage = 6;
+            int totalItems = await products.CountAsync();
+            int currentPage = page ?? 1;
+
+            var paginatedProducts = await products
+                .Skip((currentPage - 1) * _perPage)
+                .Take(_perPage)
+                .ToListAsync();
+
+            ViewBag.lastPage = (int)Math.Ceiling((double)totalItems / _perPage);
+            ViewBag.CurrentPage = currentPage; 
+            ViewBag.Products = paginatedProducts;
+            ViewBag.CategoryId = categoryId; 
+
             return View();
         }
 
@@ -271,13 +300,10 @@ namespace Fermetta.Controllers
             var answer = await assistant.AskAsync(productId, question);
             if (string.IsNullOrWhiteSpace(answer)) answer = UnknownAnswer;
 
-            // Logica de salvare log-uri AI (simplificată pentru concizie, dar funcțională)
-            // Poți decomenta partea cu ProductAssistantLog dacă o folosești
-
             return Json(new { ok = true, answer });
         }
 
-        // POST: Products/AddReview (Create sau Edit)
+        // POST: Products/AddReview
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -298,13 +324,11 @@ namespace Fermetta.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
 
-            // Verificăm dacă există deja recenzie
             var review = await _context.ProductReviews
                 .FirstOrDefaultAsync(r => r.Product_Id == productId && r.UserId == user.Id);
 
             if (review == null)
             {
-                // Create
                 review = new ProductReview
                 {
                     Product_Id = productId,
@@ -318,7 +342,6 @@ namespace Fermetta.Controllers
             }
             else
             {
-                // Update
                 review.Rating = rating;
                 review.Comment = comment;
                 review.CreatedAt = DateTime.UtcNow;
@@ -342,14 +365,11 @@ namespace Fermetta.Controllers
             var review = await _context.ProductReviews
                 .FirstOrDefaultAsync(r => r.Product_Id == productId && r.UserId == user.Id);
 
-            // Permitem ștergerea dacă e review-ul meu SAU sunt admin
             bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
 
             if (review == null && isAdmin)
             {
-                // Adminul poate șterge orice review, dar aici e logică simplă.
-                // Dacă adminul apasă delete pe review-ul altcuiva, id-ul review-ului ar trebui trimis, nu productId + userId curent.
-                // Dar pentru butonul "Șterge review-ul MEU", logica e corectă.
+                // Admin logic simplified
             }
 
             if (review != null)
@@ -371,27 +391,22 @@ namespace Fermetta.Controllers
             return _context.Products.Any(e => e.Product_Id == id);
         }
 
-        // Visitor memory
-
         [AllowAnonymous]
         public IActionResult RequireLogin(int productId, string intent)
         {
             TempData["Message"] = "To continue, please sign up or log in.";
-
             string resumeUrl = Url.Action("ResumeIntent", "Products", new { productId = productId, intent = intent });
-
             return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = resumeUrl });
         }
 
-        // 2. Metodă executată AUTOMAT după ce utilizatorul se loghează
         [Authorize]
-        public async Task<IActionResult> ResumeIntent(int productId, string intent)
+        public async Task<IActionResult> ResumeIntent(int productId, string intent, int quantity = 1)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction(nameof(Index));
             if (await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                return RedirectToAction(nameof(Index)); 
+                return RedirectToAction(nameof(Index));
             }
             if (intent == "cart")
             {
@@ -407,11 +422,11 @@ namespace Fermetta.Controllers
 
                 if (cartItem == null)
                 {
-                    _context.CartItems.Add(new CartItem { ShoppingCartId = cart.Id, ProductId = productId, Quantity = 1 });
+                    _context.CartItems.Add(new CartItem { ShoppingCartId = cart.Id, ProductId = productId, Quantity = quantity }); ;
                 }
                 else
                 {
-                    cartItem.Quantity++;
+                    cartItem.Quantity += quantity;
                     _context.Update(cartItem);
                 }
 
