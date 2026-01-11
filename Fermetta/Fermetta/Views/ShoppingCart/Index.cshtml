@@ -1,0 +1,136 @@
+﻿@model Fermetta.Models.ShoppingCart
+
+@{
+    ViewData["Title"] = "Your Shopping Cart";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4 display-6">🛒 Your Shopping Cart</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.CartItems == null || !Model.CartItems.Any())
+    {
+        <div class="text-center py-5 bg-light rounded-3">
+            <h4 class="text-muted">Your Shopping Cart is empty.</h4>
+            <p class="mb-4">You haven't added any products.</p>
+            <a asp-controller="Products" asp-action="Catalog" class="btn btn-success btn-lg">
+                Go to products &raquo;
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 p-3" scope="col">Product</th>
+                                        <th class="border-0 p-3" scope="col">Price</th>
+                                        <th class="border-0 p-3" scope="col">Amount</th>
+                                        <th class="border-0 p-3" scope="col">Total</th>
+                                        <th class="border-0 p-3" scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.CartItems)
+                                    {
+                                        <tr>
+                                            <td class="p-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                        <span class="fs-4">📦</span>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0">@item.Product?.Name</h6>
+                                                        <small class="text-muted">Categorie: @item.Product?.Category?.Name</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-3">
+                                                <strong>@item.Product?.Price RON</strong>
+                                            </td>
+                                            <td class="p-3">
+                                                <form asp-controller="ShoppingCart" asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
+                                                    <input type="hidden" name="productId" value="@item.ProductId" />
+
+                                                    <div class="input-group input-group-sm" style="width: 120px;">
+                                                        <input type="number" name="quantity" value="@item.Quantity" min="1" max="100" class="form-control text-center" />
+                                                        <button class="btn btn-outline-secondary" type="submit" title="Update">
+                                                            ↻
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="p-3 text-success fw-bold">
+                                                @((item.Quantity * (item.Product?.Price ?? 0)).ToString("0.00")) RON
+                                            </td>
+                                            <td class="p-3 text-end">
+                                                <form asp-controller="ShoppingCart" asp-action="RemoveFromCart" method="post">
+                                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                                    <button type="submit" class="btn btn-link text-danger p-0" title="Remove from Cart">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-controller="Products" asp-action="Catalog" class="btn btn-outline-dark">
+                        &laquo; Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="mb-0">Order Review</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total</span>
+                            <span>@Model.TotalAmount.ToString("0.00") RON</span>
+                        </div>
+
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fs-5 fw-bold">Total</span>
+                            <span class="fs-5 fw-bold text-success">@Model.TotalAmount.ToString("0.00") RON</span>
+                        </div>
+
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success w-100 btn-lg shadow-sm">
+                            Finish Order
+                        </a>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Safe Payment</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

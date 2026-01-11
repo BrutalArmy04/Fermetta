@@ -2,6 +2,7 @@ using Fermetta.Data;
 using Fermetta.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Fermetta.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<Fermetta.Services.Checkout>();
+
+builder.Services.AddScoped<IProductAssistantService, ProductAssistantService>();
+
 
 var app = builder.Build();
 

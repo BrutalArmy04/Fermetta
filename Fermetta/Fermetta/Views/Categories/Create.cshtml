@@ -10,23 +10,33 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageFile" class="control-label">Category Image</label>
+                <input asp-for="ImageFile" class="form-control" type="file" accept=".png,.jpg,.jpeg,.gif" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+
+            <div class="form-group form-check mb-3">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="Disponibility" /> @Html.DisplayNameFor(model => model.Disponibility)
                 </label>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -39,5 +49,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

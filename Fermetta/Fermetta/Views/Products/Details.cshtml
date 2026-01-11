@@ -1,60 +1,305 @@
-﻿@model Fermetta.Models.Product
+﻿@model Fermetta.Models.ViewModels.ProductDetails
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Fermetta.Models.ApplicationUser> UserManager
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Product Details";
+    var backUrl = Context.Request.Headers["Referer"].ToString();
+    if (string.IsNullOrWhiteSpace(backUrl)) { backUrl = Url.Action("Catalog", "Products"); }
+
+    var currentUser = await UserManager.GetUserAsync(User);
+    var myReview = (currentUser != null && Model.Reviews != null)
+                   ? Model.Reviews.FirstOrDefault(r => r.UserId == currentUser.Id)
+                   : null;
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-<div>
-    <h4>Product</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Weight)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Weight)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Valability)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Valability)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Personalised)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Personalised)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category_Id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category_Id)
-        </dd>
-    </dl>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h3 class="text-success mb-1"><i class="bi bi-info-circle"></i> @Model.Product.Name</h3>
+                    <div class="text-muted small">Product ID: @Model.Product.Product_Id</div>
+                </div>
+                <div class="text-end">
+                    @if (Model.Product.Stock > 0)
+                    {
+                        <span class="badge bg-success">In stock</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Out of stock</span>
+                    }
+
+                    @if (Model.Product.Personalised)
+                    {
+                        <span class="badge bg-warning text-dark ms-2"><i class="bi bi-stars"></i> Personalised</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(Model.Product.ImagePath))
+                    {
+                        <div class="mb-3">
+                            <img src="@Model.Product.ImagePath" class="img-fluid rounded border shadow-sm" style="width: 100%; height: 300px; object-fit: cover;">
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted mb-3" style="height: 300px;">
+                            <span class="fs-1">🌱</span>
+                        </div>
+                    }
+                    <div class="d-grid gap-2">
+                        <a href="@backUrl" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to list</a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Product.Product_Id" class="btn btn-outline-success"><i class="bi bi-pencil-square"></i> Edit</a>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <h5 class="mb-3">Product information</h5>
+                    @if (!string.IsNullOrWhiteSpace(Model.Product.Description))
+                    {
+                        <div class="mb-4">
+                            <div class="border rounded p-3 bg-light">@Model.Product.Description</div>
+                        </div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-sm-6 mb-3"><div class="text-muted small">Price</div><div class="fs-4 fw-bold text-success">@Model.Product.Price lei</div></div>
+                        <div class="col-sm-6 mb-3"><div class="text-muted small">Stock</div><div class="fs-5 fw-semibold">@Model.Product.Stock</div></div>
+                        <div class="col-sm-6 mb-3"><div class="text-muted small">Weight</div><div class="fw-semibold">@Model.Product.Weight</div></div>
+                        <div class="col-sm-6 mb-3"><div class="text-muted small">Validity</div><div class="fw-semibold">@Model.Product.Validity.ToString("dd.MM.yyyy")</div></div>
+                        <div class="col-sm-12"><div class="text-muted small">Category</div><div class="fw-semibold">@(Model.Product.Category != null ? Model.Product.Category.Name : "—")</div></div>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap mb-4 align-items-center">
+                        <a asp-controller="Products" asp-action="Catalog" class="btn btn-success" style="height: 38px;">
+                            <i class="bi bi-grid-3x3-gap"></i> Go to catalog
+                        </a>
+
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            if (!User.IsInRole("Admin"))
+                            {
+                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="d-flex m-0 gap-2">
+                                    <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
+
+                                    <div class="input-group" style="width: 140px;">
+                                        <span class="input-group-text bg-white px-2">Qty</span>
+                                        <input type="number" name="quantity" value="1" min="1" max="@Model.Product.Stock" class="form-control text-center" />
+                                    </div>
+
+                                    <button type="submit" class="btn btn-outline-success">
+                                        <i class="bi bi-cart-plus"></i> Add
+                                    </button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("RequireLogin", "Products", new { productId = Model.Product.Product_Id, intent = "cart" })"
+                               class="btn btn-outline-success">
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </a>
+                        }
+                    </div>
+
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <strong><i class="bi bi-chat-dots"></i> Product Assistant</strong>
+                        </div>
+                        <div class="card-body" style="max-height: 200px; overflow:auto;" id="pa-messages">
+                            <div class="text-muted small">Ask: “Does it have warranty?”</div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <form id="pa-form" class="m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" id="pa-productId" value="@Model.Product.Product_Id" />
+                                <div class="input-group">
+                                    <input class="form-control" id="pa-question" placeholder="Type question..." />
+                                    <button class="btn btn-success" type="submit">Send</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-8 offset-md-2">
+            <h3 class="mb-4">Customer Reviews (@Model.ReviewsCount)</h3>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="card mb-4 @(myReview != null ? "border-warning" : "border-success")">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @if (myReview != null)
+                            {
+                                <span><i class="bi bi-pencil"></i> Edit your review!</span>
+                            }
+                            else
+                            {
+                                <span>Leave a review!</span>
+                            }
+                        </h5>
+
+                        <form asp-action="AddReview" asp-controller="Products" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <select name="rating" class="form-select w-auto">
+                                    <!option value="5" @(myReview?.Rating == 5 ? "selected" : "")>⭐⭐⭐⭐⭐ (5/5)</!option>
+                                    <!option value="4" @(myReview?.Rating == 4 ? "selected" : "")>⭐⭐⭐⭐ (4/5)</!option>
+                                    <!option value="3" @(myReview?.Rating == 3 ? "selected" : "")>⭐⭐⭐ (3/5)</!option>
+                                    <!option value="2" @(myReview?.Rating == 2 ? "selected" : "")>⭐⭐ (2/5)</!option>
+                                    <!option value="1" @(myReview?.Rating == 1 ? "selected" : "")>⭐ (1/5)</!option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Comentariu</label>
+                                <textarea name="comment" class="form-control" rows="3" required placeholder="Share your experience...">@(myReview?.Comment)</textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn @(myReview != null ? "btn-warning" : "btn-primary")">
+                                    @(myReview != null ? "Update Review" : "Send Review")
+                                </button>
+
+                                @if (myReview != null)
+                                {
+                                    <button type="submit" asp-action="DeleteReview" asp-controller="Products"
+                                            class="btn btn-outline-danger"
+                                            onclick="return confirm('Are you sure you want to delete your review?');">
+                                        <i class="bi bi-trash"></i> Delete Review
+                                    </button>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">Please login to leave a review.</div>
+            }
+
+            @if (Model.Reviews != null && Model.Reviews.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        var isMyReview = (currentUser != null && review.UserId == currentUser.Id);
+                        <div class="list-group-item p-4 mb-3 border rounded shadow-sm @(isMyReview ? "bg-light border-warning" : "")">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1 fw-bold">
+                                    @if (review.User != null)
+                                    {
+                                        @review.User.FirstName @review.User.LastName
+                                        @if (isMyReview)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-2">Eu</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span>Visitor</span>
+                                    }
+                                </h5>
+                                <small class="text-muted">@review.CreatedAt.ToString("dd MMM yyyy, HH:mm")</small>
+                            </div>
+
+                            <div class="text-warning mb-2 fs-5">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.Rating)
+                                    {
+                                        <span>&#9733;</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">&#9734;</span>
+                                    }
+                                }
+                            </div>
+
+                            <p class="mb-1 text-dark fs-5">@review.Comment</p>
+
+                            @if (isMyReview || User.IsInRole("Admin"))
+                            {
+                                <div class="mt-2 text-end">
+                                    <form asp-action="DeleteReview" asp-controller="Products" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="@Model.Product.Product_Id" />
+                                        <button type="submit" class="btn btn-sm btn-link text-danger text-decoration-none" onclick="return confirm('Delete Review?')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-light text-center border p-5">
+                    <p class="mb-0 text-muted">This product does not have reviews yet.</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Product_Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<script>
+    (function () {
+        const form = document.getElementById("pa-form");
+        const messages = document.getElementById("pa-messages");
+        const question = document.getElementById("pa-question");
+        const productId = document.getElementById("pa-productId");
+        function esc(s){ return (s||"").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+        function addBubble(text, who) {
+            const wrap = document.createElement("div");
+            wrap.className = "mb-2";
+            wrap.innerHTML = `<div class="small ${who === 'user' ? 'text-end' : ''}"><span class="badge ${who === 'user' ? 'bg-secondary' : 'bg-success'}">${who === 'user' ? 'You' : 'AI'}</span></div><div class="p-2 rounded ${who === 'user' ? 'bg-light' : 'bg-success text-white'}">${esc(text)}</div>`;
+            messages.appendChild(wrap);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const q = question.value.trim();
+            if (q.length < 2) return;
+            addBubble(q, "user");
+            question.value = "";
+            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+            try {
+                const resp = await fetch("@Url.Action("AskAssistant", "Products")", {
+                    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({ __RequestVerificationToken: token, productId: productId.value, question: q })
+                });
+                const data = await resp.json();
+                addBubble(data.answer || "No info.", "ai");
+            } catch(err) { console.error(err); addBubble("Error.", "ai"); }
+        });
+    })();
+</script>

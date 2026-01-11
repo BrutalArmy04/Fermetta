@@ -1,47 +1,94 @@
 ﻿@model IEnumerable<Fermetta.Models.Category>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Categories";
 }
 
-<h1>Index</h1>
+<div class="container py-4">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Disponibility)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Disponibility)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Category_Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Category_Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Category_Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="text-success m-0">Our Categories</h2>
+            <p class="text-muted mb-0">Choose a category and explore our products.</p>
+        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-outline-success">
+                <i class="bi bi-plus-circle"></i> Add Category
+            </a>
+        }
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+        @foreach (var c in Model)
+        {
+            var productCount = c.Products?.Count ?? 0;
+
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(c.ImagePath))
+                    {
+                        <div class="card-img-top" style="height: 140px; overflow: hidden;">
+                            <img src="@c.ImagePath" alt="@c.Name" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted"
+                             style="height: 140px;">
+                            <span class="fs-1">🏷️</span>
+                        </div>
+                    }
+
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <h5 class="card-title mb-1">@c.Name</h5>
+                            @if (c.Disponibility)
+                            {
+                                <span class="badge bg-success">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Unavailable</span>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(c.Description))
+                        {
+                            <p class="card-text text-muted mt-2 mb-2 text-truncate">@c.Description</p>
+                        }
+                        else
+                        {
+                            <p class="card-text text-muted mt-2 mb-2">No description yet.</p>
+                        }
+
+                        <div class="small text-muted mb-3">
+                            <i class="bi bi-box-seam"></i> @productCount products
+                        </div>
+
+                        <a asp-controller="Products" asp-action="Catalog" asp-route-categoryId="@c.Category_Id" class="btn btn-success w-100">
+                            View products <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="card-footer bg-white border-top-0 d-flex gap-2 justify-content-end">
+                        <a asp-action="Details" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@c.Category_Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

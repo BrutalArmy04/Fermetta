@@ -18,5 +18,6 @@ namespace Fermetta.Models
         public DateTime LastAuthentiationDate { get; set; } = DateTime.Now;
         [NotMapped]
         public required IEnumerable<SelectListItem> AllRoles { get; set; }
+        public virtual ShoppingCart? ShoppingCart { get; set; }
     }
 }

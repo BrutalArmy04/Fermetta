@@ -1,43 +1,205 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@*Lista produse*@
-@foreach (var p in ViewBag.Products)
-{
-    <div class="mb-2">
-        <a asp-controller="Products"
-           asp-action="Details"
-           asp-route-id="@p.Product_Id">
-            <strong>@p.Name</strong>
-        </a>
-        <div>
-            Preț: @p.Price lei
-        </div>
-    </div>
+﻿@{
+    ViewData["Title"] = "Products Catalog";
+    // Obținem pagina curentă și ultima pagină din ViewBag
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var lastPage = ViewBag.lastPage as int? ?? 1;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
+<div class="container py-4">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-<div>
-    <nav aria-label="Page navigation example">
-        <ul class="pagination">
-            <li class="page-item">
-                <a class="page-link" href="@ViewBag.PaginationBaseUrl=1" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
+    <h2 class="mb-4 text-success">Available Products</h2>
 
-            @for (int i = 1; i <= ViewBag.lastPage; i++)
-            {
-                <li class="page-item">
-                    <a class="page-link" href="@ViewBag.PaginationBaseUrl=@i">@(i)</a>
+    <div class="card mb-4 bg-light border-0">
+        <div class="card-body">
+            <form asp-action="Catalog" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Search Product</label>
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="ex: yoghurt, tulips etc.." />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Categories</label>
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in ViewBag.Categories)
+                            {
+                                if ((string)ViewData["CurrentCategory"] == cat)
+                                {
+                                    <option value="@cat" selected>@cat</option>
+                                }
+                                else
+                                {
+                                    <option value="@cat">@cat</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Sort</label>
+                    <select name="sortOrder" class="form-select">
+                        <option value="">Default</option>
+                        <!option value="price_asc" @(ViewData["CurrentSort"] as string == "price_asc" ? "selected" : "")>Price Asc</!option>
+                        <!option value="price_desc" @(ViewData["CurrentSort"] as string == "price_desc" ? "selected" : "")>Price Desc</!option>
+                        <!option value="rating_desc" @(ViewData["CurrentSort"] as string == "rating_desc" ? "selected" : "")>Rating Best to Worst</!option>
+                        <!option value="rating_asc" @(ViewData["CurrentSort"] as string == "rating_asc" ? "selected" : "")>Rating Worst to Best</!option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Filter</button>
+                    <a asp-action="Catalog" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var p in ViewBag.Products)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(p.ImagePath))
+                    {
+                        <img src="@p.ImagePath" class="card-img-top" alt="@p.Name" style="height: 200px; object-fit: cover; width: 100%;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
+                            <span class="fs-1">🌱</span>
+                        </div>
+                    }
+
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Products" asp-action="Details" asp-route-id="@p.Product_Id" class="text-decoration-none text-dark">
+                                @p.Name
+                            </a>
+                        </h5>
+
+                        @if (p.Category != null)
+                        {
+                            <span class="badge bg-success mb-2">@p.Category.Name</span>
+                        }
+
+                        <p class="card-text fs-5 fw-bold text-success">
+                            @p.Price lei
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-grid gap-2">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                
+                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Product_Id" />
+                                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                                    <div class="input-group mb-2">
+                                        <input type="number" name="quantity" value="1" min="1" max="@p.Stock" class="form-control" placeholder="1" aria-label="Quantity">
+                                        <button type="submit" class="btn btn-outline-success">
+                                            <i class="bi bi-cart-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                                @if (!User.IsInRole("Admin"))
+                                {
+                                    <form asp-controller="Wishlist" asp-action="Add" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Product_Id" />
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                        <button type="submit" class="btn btn-outline-secondary w-100">
+                                            <i class="bi bi-heart"></i> Add to Wishlist
+                                        </button>
+                                    </form>
+
+                                }
+                            }
+                            else
+                            {
+                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Product_Id" />
+                                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                                    <div class="input-group mb-2">
+                                        <input type="number" name="quantity" value="1" min="1" max="@p.Stock" class="form-control" placeholder="1" aria-label="Quantity">
+                                        <button type="submit" class="btn btn-outline-success">
+                                            <i class="bi bi-cart-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                                <a href="@Url.Action("RequireLogin", "Products", new { productId = p.Product_Id, intent = "wishlist", returnUrl = returnUrl })"
+                                   class="btn btn-outline-secondary">
+
+                                    <i class="bi bi-heart"></i> Add to Wishlist
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-5 d-flex justify-content-center">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link text-success"
+                       asp-action="Catalog"
+                       asp-route-page="@(currentPage - 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-category="@ViewData["CurrentCategory"]"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
                 </li>
-            }
 
-            <li class="page-item">
-                <a class="page-link" href="@ViewBag.PaginationBaseUrl=@(ViewBag.lastPage)" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+                @for (int i = 1; i <= lastPage; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link @(i == currentPage ? "bg-success border-success" : "text-success")"
+                           asp-action="Catalog"
+                           asp-route-page="@i"
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           asp-route-category="@ViewData["CurrentCategory"]"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                <li class="page-item @(currentPage == lastPage ? "disabled" : "")">
+                    <a class="page-link text-success"
+                       asp-action="Catalog"
+                       asp-route-page="@(currentPage + 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-category="@ViewData["CurrentCategory"]"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
