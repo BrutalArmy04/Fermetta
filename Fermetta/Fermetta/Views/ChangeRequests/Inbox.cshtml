@@ -29,7 +29,7 @@ else
                     <td>@r.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                     <td>@r.Type</td>
                     <td>@r.Action</td>
-                    <td>@(string.IsNullOrWhiteSpace(r.ContributorNote) ? "-" : r.ContributorNote)</td>
+                    <td>@(string.IsNullOrWhiteSpace(r.ContribuitorNote) ? "-" : r.ContribuitorNote)</td>
                     <td>
                         <a class="btn btn-sm btn-primary" asp-action="Review" asp-route-id="@r.ChangeRequest_Id">Review</a>
                     </td>

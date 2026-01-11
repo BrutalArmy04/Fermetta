@@ -13,7 +13,7 @@ namespace Fermetta.Models
         public int ProductId { get; set; } // FK catre Produs
 
         [Required]
-        [Range(1, 100, ErrorMessage = "Cantitatea trebuie să fie cel puțin 1.")]
+        [Range(1, 100, ErrorMessage = "Quantity must be at least 1.")]
         public int Quantity { get; set; }
 
         public string? Observations { get; set; } 

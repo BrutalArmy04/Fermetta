@@ -11,32 +11,32 @@ namespace Fermetta.Models.ViewModels.ChangeRequests
         public ChangeAction RequestAction { get; set; }
         public ChangeRequestStatus Status { get; set; }
 
-        public string? ContributorNote { get; set; }
+        public string? ContribuitorNote { get; set; }
         public string? AdminNote { get; set; }
 
-        // PROPOSED 
+        // proposed
         public string? ProposedCategoryName { get; set; }
         public string? ProposedCategoryDescription { get; set; }
-        public bool ProposedCategoryDisponibility { get; set; }
+        public bool ProposedCategoryAvailability { get; set; }
 
         public string? ProposedProductName { get; set; }
         public int? ProposedWeight { get; set; }
-        public DateTime? ProposedValability { get; set; }
+        public DateTime? ProposedValidity { get; set; }
         public decimal? ProposedPrice { get; set; }
         public int? ProposedStock { get; set; }
         public bool ProposedPersonalised { get; set; }
         public int? ProposedCategory_Id { get; set; }
 
-        // DRAFT (editable)
+        // draft (editable)
         [StringLength(150)]
         public string? DraftCategoryName { get; set; }
         public string? DraftCategoryDescription { get; set; }
-        public bool DraftCategoryDisponibility { get; set; }
+        public bool DraftCategoryAvailability { get; set; }
 
         [StringLength(100)]
         public string? DraftProductName { get; set; }
         public int? DraftWeight { get; set; }
-        public DateTime? DraftValability { get; set; }
+        public DateTime? DraftValidity { get; set; }
         public decimal? DraftPrice { get; set; }
         public int? DraftStock { get; set; }
         public bool DraftPersonalised { get; set; }

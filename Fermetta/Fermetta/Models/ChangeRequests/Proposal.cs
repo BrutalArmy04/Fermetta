@@ -13,7 +13,7 @@ namespace Fermetta.Models.ChangeRequests
     {
         public string Name { get; set; }
         public int Weight { get; set; }
-        public DateTime Valability { get; set; }
+        public DateTime Validity { get; set; }
         public decimal Price { get; set; }
         public int Stock { get; set; }
         public bool Personalised { get; set; }

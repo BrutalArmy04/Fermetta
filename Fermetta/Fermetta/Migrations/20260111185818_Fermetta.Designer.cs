@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fermetta.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260107201728_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260111185818_Fermetta")]
+    partial class Fermetta
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -213,7 +213,7 @@ namespace Fermetta.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("ContributorNote")
+                    b.Property<string>("ContribuitorNote")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -342,7 +342,7 @@ namespace Fermetta.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Valability")
+                    b.Property<DateTime>("Validity")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Weight")

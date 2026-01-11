@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fermetta.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Fermetta : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -88,7 +88,7 @@ namespace Fermetta.Migrations
                     TargetProductId = table.Column<int>(type: "int", nullable: true),
                     ProposedJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AdminDraftJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ContributorNote = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ContribuitorNote = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     AdminNote = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     ReviewedByUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReviewedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -294,7 +294,7 @@ namespace Fermetta.Migrations
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Weight = table.Column<int>(type: "int", nullable: false),
-                    Valability = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Validity = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
                     Stock = table.Column<int>(type: "int", nullable: false),
                     Personalised = table.Column<bool>(type: "bit", nullable: false),

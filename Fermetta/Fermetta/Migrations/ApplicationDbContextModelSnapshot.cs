@@ -210,7 +210,7 @@ namespace Fermetta.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("ContributorNote")
+                    b.Property<string>("ContribuitorNote")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -339,7 +339,7 @@ namespace Fermetta.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Valability")
+                    b.Property<DateTime>("Validity")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Weight")

@@ -86,9 +86,9 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group mb-3">
-                <label asp-for="ContributorNote" class="form-label">Note (optional)</label>
-                <textarea asp-for="ContributorNote" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="ContributorNote" class="text-danger"></span>
+                <label asp-for="ContribuitorNote" class="form-label">Note (optional)</label>
+                <textarea asp-for="ContribuitorNote" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ContribuitorNote" class="text-danger"></span>
             </div>
 
             <div class="alert alert-info">
@@ -116,8 +116,8 @@
                 </div>
 
                 <div class="form-check mb-3">
-                    <input asp-for="CategoryDisponibility" class="form-check-input" />
-                    <label asp-for="CategoryDisponibility" class="form-check-label">Disponibility</label>
+                    <input asp-for="CategoryAvailability" class="form-check-input" />
+                    <label asp-for="CategoryAvailability" class="form-check-label">Availability</label>
                 </div>
             </div>
 
@@ -135,6 +135,7 @@
                     <textarea asp-for="ProductDescription" class="form-control" rows="3"></textarea>
                     <span asp-validation-for="ProductDescription" class="text-danger"></span>
                 </div>
+
                 <div class="form-group mb-3">
                     <label asp-for="ImageFile" class="form-label">Product Image</label>
 
@@ -150,6 +151,7 @@
                     <input asp-for="ImageFile" class="form-control" type="file" accept=".png,.jpg,.jpeg,.gif" />
                     <span asp-validation-for="ImageFile" class="text-danger"></span>
                 </div>
+
                 <div class="form-group mb-3">
                     <label asp-for="Weight" class="form-label">Weight</label>
                     <input asp-for="Weight" class="form-control" type="number" />
@@ -157,9 +159,9 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <label asp-for="Valability" class="form-label">Valability</label>
-                    <input asp-for="Valability" class="form-control" type="date" />
-                    <span asp-validation-for="Valability" class="text-danger"></span>
+                    <label asp-for="Validity" class="form-label">Expiration Date</label>
+                    <input asp-for="Validity" class="form-control" type="date" />
+                    <span asp-validation-for="Validity" class="text-danger"></span>
                 </div>
 
                 <div class="form-group mb-3">
@@ -206,34 +208,61 @@
 
     <script>
         function applyVisibility() {
-            var type = document.getElementById("crType").value; // "1" Category, "2" Product
-            var action = document.getElementById("crAction").value; // "1" Create, "2" Update
-
-            // keep POST hidden values in sync
+            var type = document.getElementById("crType").value; 
+            var action = document.getElementById("crAction").value; 
+  
             document.getElementById("hiddenType").value = type;
             document.getElementById("hiddenAction").value = action;
 
-            // info box labels
             document.getElementById("infoType").innerText = (type === "1") ? "Category" : "Product";
             document.getElementById("infoAction").innerText = (action === "1") ? "Create" : "Update";
 
-            // show only relevant fields
-            document.getElementById("categoryFields").style.display = (type === "1") ? "" : "none";
-            document.getElementById("productFields").style.display = (type === "2") ? "" : "none";
+            var catFields = document.getElementById("categoryFields");
+            var prodFields = document.getElementById("productFields");
 
-            // Load form shown only for Update
-            var showLoad = (action === "2");
-            document.getElementById("loadButtonBox").style.display = showLoad ? "" : "none";
-            document.getElementById("targetsRow").style.display = showLoad ? "" : "none";
-            document.getElementById("loadHelp").style.display = showLoad ? "" : "none";
+            if (type === "1") {
+                catFields.classList.remove("d-none");
+                prodFields.classList.add("d-none");
+            } else {
+                catFields.classList.add("d-none");
+                prodFields.classList.remove("d-none");
+            }
 
-            // show only the correct target dropdown
-            document.getElementById("targetCategoryBox").style.display = (showLoad && type === "1") ? "" : "none";
-            document.getElementById("targetProductBox").style.display = (showLoad && type === "2") ? "" : "none";
+            var showLoad = (action === "2"); // update
+
+            var loadBtnBox = document.getElementById("loadButtonBox");
+            var targetsRow = document.getElementById("targetsRow");
+            var loadHelp = document.getElementById("loadHelp");
+
+            if (showLoad) {
+                loadBtnBox.classList.remove("d-none");
+                targetsRow.classList.remove("d-none");
+                loadHelp.classList.remove("d-none");
+            } else {
+                loadBtnBox.classList.add("d-none");
+                targetsRow.classList.add("d-none");
+                loadHelp.classList.add("d-none");
+            }
+
+            // Gestionează vizibilitatea dropdown-urilor specifice pentru Load
+            var targetCat = document.getElementById("targetCategoryBox");
+            var targetProd = document.getElementById("targetProductBox");
+
+            if (showLoad && type === "1") {
+                targetCat.classList.remove("d-none");
+                targetProd.classList.add("d-none");
+            } else if (showLoad && type === "2") {
+                targetCat.classList.add("d-none");
+                targetProd.classList.remove("d-none");
+            } else {
+                targetCat.classList.add("d-none");
+                targetProd.classList.add("d-none");
+            }
         }
 
         document.getElementById("crType").addEventListener("change", applyVisibility);
         document.getElementById("crAction").addEventListener("change", applyVisibility);
-        applyVisibility();
+
+        document.addEventListener("DOMContentLoaded", applyVisibility);
     </script>
 }

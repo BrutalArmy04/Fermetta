@@ -38,7 +38,6 @@ namespace Fermetta.Controllers
         }
         public async Task<ActionResult> ShowAsync(string id)
         {
-            //ApplicationUser? user = db.Users.Find(id);
             ApplicationUser? user = await _userManager.FindByIdAsync(id);
 
             if (user is null)
@@ -47,7 +46,6 @@ namespace Fermetta.Controllers
             }
             else
             {
-                //var roles = await _userManager.GetRolesAsync(user);
                 var allRolesListItems = _roleManager.Roles.Select(r => new SelectListItem
                 {
                     Value = r.Name,
@@ -70,7 +68,6 @@ namespace Fermetta.Controllers
                     }
                 }
 
-                //ViewBag.Roles = _roleManager.Roles.ToList();
                 ViewBag.CurrentUserId = _userManager.GetUserId(User); // ca sa nu se poata modifica pe sine
                 ViewBag.UserCurent = await _userManager.GetUserAsync(User);
 
@@ -152,10 +149,6 @@ namespace Fermetta.Controllers
             TempData["Message"] = $"{user.UserName}'s role is now {newRole}!";
             return RedirectToAction("Show", new { id = id });
         }
-        
-
-
-    }       
-
+    }      
         
 }

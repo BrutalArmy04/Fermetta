@@ -11,7 +11,7 @@ namespace Fermetta.Models.ViewModels
         public double AverageRating { get; set; }
         public int ReviewsCount { get; set; }
 
-        // Form input
+        // form input
         [Range(1, 5)]
         public int Rating { get; set; } = 5;
 

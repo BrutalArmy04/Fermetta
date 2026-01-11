@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fermetta.Controllers
 {
-    [Authorize(Roles = "User,Contributor")]
+    [Authorize(Roles = "User,Contribuitor")]
     public class CheckoutController : Controller
     {
         private readonly ApplicationDbContext _context;

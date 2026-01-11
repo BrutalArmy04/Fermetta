@@ -22,14 +22,14 @@ namespace Fermetta.Models
 
         [Required]
         [DataType(DataType.Date)]
-        public DateTime Valability { get; set; }
+        public DateTime Validity { get; set; }
         [Required]
         public decimal Price { get; set; }
         [Required]
         public int Stock { get; set; }
         public bool Personalised { get; set; }
-        [Display(Name = "Categorie")]
-        [Range(1, int.MaxValue, ErrorMessage = "Selectează o categorie.")]
+        [Display(Name = "Category")]
+        [Range(1, int.MaxValue, ErrorMessage = "Select a category.")]
         public int Category_Id { get; set; }
         [ForeignKey(nameof(Category_Id))]
         public Category? Category { get; set; }
@@ -38,7 +38,7 @@ namespace Fermetta.Models
 
         // partea cu imagini
 
-        //  va stoca calea catre imagine in Baza de Date (ex: "/images/products/poza1.jpg")
+        //  va stoca calea catre imagine in baza de date 
         public string? ImagePath { get; set; }
 
         //  nu ajunge in baza de date, este doar pentru a transporta fisierul din formular in controller

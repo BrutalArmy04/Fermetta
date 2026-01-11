@@ -85,7 +85,7 @@ namespace Fermetta.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Product_Id,Name,Description,Weight,Valability,Price,Stock,Personalised,Category_Id,ImageFile,ImagePath")] Product product)
+        public async Task<IActionResult> Create([Bind("Product_Id,Name,Description,Weight,Validity,Price,Stock,Personalised,Category_Id,ImageFile,ImagePath")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -130,7 +130,7 @@ namespace Fermetta.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Product_Id,Name,Description,Weight,Valability,Price,Stock,Personalised,Category_Id,ImageFile,ImagePath")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Product_Id,Name,Description,Weight,Validity,Price,Stock,Personalised,Category_Id,ImageFile,ImagePath")] Product product)
         {
             if (id != product.Product_Id) return NotFound();
 
@@ -317,7 +317,7 @@ namespace Fermetta.Controllers
 
             if (string.IsNullOrWhiteSpace(comment))
             {
-                TempData["Error"] = "Comentariul este obligatoriu.";
+                TempData["Error"] = "Comment is mandatory.";
                 return RedirectToAction(nameof(Details), new { id = productId });
             }
 
@@ -367,11 +367,6 @@ namespace Fermetta.Controllers
 
             bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
 
-            if (review == null && isAdmin)
-            {
-                // Admin logic simplified
-            }
-
             if (review != null)
             {
                 _context.ProductReviews.Remove(review);
@@ -390,6 +385,8 @@ namespace Fermetta.Controllers
         {
             return _context.Products.Any(e => e.Product_Id == id);
         }
+
+        // unlogged user intent handling
 
         [AllowAnonymous]
         public IActionResult RequireLogin(int productId, string intent, string returnUrl)

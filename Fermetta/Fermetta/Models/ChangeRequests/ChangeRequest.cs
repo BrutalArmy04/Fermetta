@@ -22,11 +22,11 @@ namespace Fermetta.Models.ChangeRequests
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // pentru UPDATE
+        // pentru update
         public int? TargetCategoryId { get; set; }
         public int? TargetProductId { get; set; }
 
-        // snapshot contributor
+        // snapshot Contribuitor
         [Required]
         public string ProposedJson { get; set; }
 
@@ -34,7 +34,7 @@ namespace Fermetta.Models.ChangeRequests
         public string? AdminDraftJson { get; set; }
 
         [StringLength(500)]
-        public string? ContributorNote { get; set; }
+        public string? ContribuitorNote { get; set; }
 
         [StringLength(500)]
         public string? AdminNote { get; set; }

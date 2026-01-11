@@ -15,8 +15,7 @@ namespace Fermetta.Models
 
         public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 
-        // Suma totala poate fi calculata dinamic, dar o putem pastra daca dorim caching
-        [NotMapped] // Nu o salvam in baza, o calculam la cerere
+       [NotMapped]
         public decimal TotalAmount
         {
             get

@@ -60,7 +60,7 @@ namespace Fermetta.Controllers
                     {
                         vm.CategoryName = cat.Name;
                         vm.CategoryDescription = cat.Description;
-                        vm.CategoryDisponibility = cat.Disponibility;
+                        vm.CategoryAvailability = cat.Disponibility;
                     }
                 }
             }
@@ -72,9 +72,9 @@ namespace Fermetta.Controllers
                     if (prod != null)
                     {
                         vm.ProductName = prod.Name;
-                        vm.ProductDescription = prod.Description; // <--- ADAUGAT: Încărcare descriere
+                        vm.ProductDescription = prod.Description; 
                         vm.Weight = prod.Weight;
-                        vm.Valability = prod.Valability.Date;
+                        vm.Validity = prod.Validity.Date;
                         vm.Price = prod.Price;
                         vm.Stock = prod.Stock;
                         vm.Personalised = prod.Personalised;
@@ -103,7 +103,7 @@ namespace Fermetta.Controllers
                 if (string.IsNullOrWhiteSpace(vm.ProductName)) ModelState.AddModelError(nameof(vm.ProductName), "Product name is mandatory.");
                 if (string.IsNullOrWhiteSpace(vm.ProductDescription)) ModelState.AddModelError(nameof(vm.ProductDescription), "Description is mandatory."); // <--- VALIDARE
                 if (vm.Weight is null) ModelState.AddModelError(nameof(vm.Weight), "Weight is mandatory.");
-                if (vm.Valability is null) ModelState.AddModelError(nameof(vm.Valability), "Valability is mandatory.");
+                if (vm.Validity is null) ModelState.AddModelError(nameof(vm.Validity), "Validity is mandatory.");
                 if (vm.Price is null) ModelState.AddModelError(nameof(vm.Price), "Price is mandatory.");
                 if (vm.Stock is null) ModelState.AddModelError(nameof(vm.Stock), "Stock is mandatory.");
                 if (vm.Category_Id is null || vm.Category_Id < 1) ModelState.AddModelError(nameof(vm.Category_Id), "Select a category.");
@@ -141,7 +141,7 @@ namespace Fermetta.Controllers
                 {
                     Name = vm.CategoryName!,
                     Description = vm.CategoryDescription,
-                    Disponibility = vm.CategoryDisponibility
+                    Disponibility = vm.CategoryAvailability
                 };
                 proposedJson = JsonSerializer.Serialize(dto);
             }
@@ -150,9 +150,9 @@ namespace Fermetta.Controllers
                 var dto = new ProductProposal
                 {
                     Name = vm.ProductName!,
-                    Description = vm.ProductDescription, // <--- ADAUGAT: Salvare în JSON
+                    Description = vm.ProductDescription,
                     Weight = vm.Weight!.Value,
-                    Valability = vm.Valability!.Value.Date,
+                    Validity = vm.Validity!.Value.Date,
                     Price = vm.Price!.Value,
                     Stock = vm.Stock!.Value,
                     Personalised = vm.Personalised,
@@ -168,7 +168,7 @@ namespace Fermetta.Controllers
                 Action = vm.RequestAction,
                 Status = ChangeRequestStatus.Pending,
                 CreatedByUserId = _userManager.GetUserId(User)!,
-                ContributorNote = vm.ContributorNote,
+                ContribuitorNote = vm.ContribuitorNote,
                 TargetCategoryId = vm.TargetCategoryId,
                 TargetProductId = vm.TargetProductId,
                 ProposedJson = proposedJson
@@ -215,14 +215,14 @@ namespace Fermetta.Controllers
                 {
                     Name = vm.DraftCategoryName!,
                     Description = vm.DraftCategoryDescription,
-                    Disponibility = vm.DraftCategoryDisponibility
+                    Disponibility = vm.DraftCategoryAvailability
                 };
                 draftJson = JsonSerializer.Serialize(dto);
             }
             else
             {
                 if (string.IsNullOrWhiteSpace(vm.DraftProductName) || string.IsNullOrWhiteSpace(vm.DraftProductDescription) || // <--- VALIDARE
-                    vm.DraftWeight is null || vm.DraftValability is null || vm.DraftPrice is null || vm.DraftStock is null || vm.DraftCategory_Id is null || vm.DraftCategory_Id < 1)
+                    vm.DraftWeight is null || vm.DraftValidity is null || vm.DraftPrice is null || vm.DraftStock is null || vm.DraftCategory_Id is null || vm.DraftCategory_Id < 1)
                 {
                     TempData["Error"] = "Complete all product fields.";
                     return RedirectToAction(nameof(Review), new { id = vm.Id });
@@ -235,9 +235,9 @@ namespace Fermetta.Controllers
                 var dto = new ProductProposal
                 {
                     Name = vm.DraftProductName!,
-                    Description = vm.DraftProductDescription, // <--- ADAUGAT
+                    Description = vm.DraftProductDescription, 
                     Weight = vm.DraftWeight.Value,
-                    Valability = vm.DraftValability.Value.Date,
+                    Validity = vm.DraftValidity.Value.Date,
                     Price = vm.DraftPrice.Value,
                     Stock = vm.DraftStock.Value,
                     Personalised = vm.DraftPersonalised,
@@ -328,7 +328,7 @@ namespace Fermetta.Controllers
                         Name = dto.Name,
                         Description = dto.Description,
                         Weight = dto.Weight,
-                        Valability = dto.Valability.Date,
+                        Validity = dto.Validity.Date,
                         Price = dto.Price,
                         Stock = dto.Stock,
                         Personalised = dto.Personalised,
@@ -344,7 +344,7 @@ namespace Fermetta.Controllers
                     prod.Name = dto.Name;
                     prod.Description = dto.Description; 
                     prod.Weight = dto.Weight;
-                    prod.Valability = dto.Valability.Date;
+                    prod.Validity = dto.Validity.Date;
                     prod.Price = dto.Price;
                     prod.Stock = dto.Stock;
                     prod.Personalised = dto.Personalised;
@@ -368,7 +368,7 @@ namespace Fermetta.Controllers
                 Type = req.Type,
                 RequestAction = req.Action,
                 Status = req.Status,
-                ContributorNote = req.ContributorNote,
+                ContribuitorNote = req.ContribuitorNote,
                 AdminNote = req.AdminNote,
                 Categories = await _db.Categories.OrderBy(c => c.Name).Select(c => new ValueTuple<int, string>(c.Category_Id, c.Name)).ToListAsync()
             };
@@ -377,8 +377,8 @@ namespace Fermetta.Controllers
             {
                 var proposed = JsonSerializer.Deserialize<CategoryProposal>(req.ProposedJson)!;
                 var draft = JsonSerializer.Deserialize<CategoryProposal>(req.AdminDraftJson ?? req.ProposedJson)!;
-                vm.ProposedCategoryName = proposed.Name; vm.ProposedCategoryDescription = proposed.Description; vm.ProposedCategoryDisponibility = proposed.Disponibility;
-                vm.DraftCategoryName = draft.Name; vm.DraftCategoryDescription = draft.Description; vm.DraftCategoryDisponibility = draft.Disponibility;
+                vm.ProposedCategoryName = proposed.Name; vm.ProposedCategoryDescription = proposed.Description; vm.ProposedCategoryAvailability = proposed.Disponibility;
+                vm.DraftCategoryName = draft.Name; vm.DraftCategoryDescription = draft.Description; vm.DraftCategoryAvailability = draft.Disponibility;
             }
             else
             {
@@ -386,9 +386,9 @@ namespace Fermetta.Controllers
                 var draft = JsonSerializer.Deserialize<ProductProposal>(req.AdminDraftJson ?? req.ProposedJson)!;
 
                 vm.ProposedProductName = proposed.Name;
-                vm.ProposedProductDescription = proposed.Description; // <--- ADAUGAT
+                vm.ProposedProductDescription = proposed.Description; 
                 vm.ProposedWeight = proposed.Weight;
-                vm.ProposedValability = proposed.Valability;
+                vm.ProposedValidity = proposed.Validity;
                 vm.ProposedPrice = proposed.Price;
                 vm.ProposedStock = proposed.Stock;
                 vm.ProposedPersonalised = proposed.Personalised;
@@ -396,9 +396,9 @@ namespace Fermetta.Controllers
                 vm.ProposedImagePath = proposed.ImagePath;
 
                 vm.DraftProductName = draft.Name;
-                vm.DraftProductDescription = draft.Description; // <--- ADAUGAT
+                vm.DraftProductDescription = draft.Description; 
                 vm.DraftWeight = draft.Weight;
-                vm.DraftValability = draft.Valability;
+                vm.DraftValidity = draft.Validity;
                 vm.DraftPrice = draft.Price;
                 vm.DraftStock = draft.Stock;
                 vm.DraftPersonalised = draft.Personalised;
