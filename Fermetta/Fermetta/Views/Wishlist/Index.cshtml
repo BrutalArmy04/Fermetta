@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Fermetta.Models.WishlistItem>
+
+@{
+    ViewData["Title"] = "Wishlist";
+}
+
+<h2>Wishlist</h2>
+
+@if (TempData["Message"] != null)
+{
+        <div class="alert alert-info">@TempData["Message"]</div>
+}
+
+@if (!Model.Any())
+{
+        <div class="alert alert-secondary">Your wishlist is empty.</div>
+}
+else
+{
+        <form asp-action="Clear" method="post" class="mb-3">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-danger btn-sm" type="submit">Clear wishlist</button>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var w in Model)
+            {
+                    <tr>
+                        <td>@w.Product?.Name</td>
+                        <td>@w.Product?.Category?.Name</td>
+                        <td>@w.Product?.Price</td>
+                        <td>@w.Product?.Stock</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary"
+                               asp-controller="Products" asp-action="Details" asp-route-id="@w.Product_Id">
+                                Details
+                            </a>
+
+                            <form asp-action="Remove" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@w.Product_Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+            }
+            </tbody>
+        </table>
+}

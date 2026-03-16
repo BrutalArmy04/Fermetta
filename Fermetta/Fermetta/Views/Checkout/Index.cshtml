@@ -1,0 +1,151 @@
+﻿@model Fermetta.Models.ViewModels.CheckoutInfo
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-success mb-1">Place order</h2>
+            <p class="text-muted mb-0">Products Recap + Address + Payment Method.</p>
+        </div>
+        <a asp-controller="ShoppingCart" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Shopping Cart
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Cart.CartItems == null || !Model.Cart.CartItems.Any())
+    {
+        <div class="text-center py-5 bg-light rounded-3">
+            <h4 class="text-muted">Shopping cart is empty.</h4>
+            <p class="mb-4">Add products before placing an order.</p>
+            <a asp-controller="Products" asp-action="Catalog" class="btn btn-success btn-lg">
+                Go to products catalog &raquo;
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+  
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Products Recap</h5>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 p-3">Product</th>
+                                        <th class="border-0 p-3">Price</th>
+                                        <th class="border-0 p-3">Quantity</th>
+                                        <th class="border-0 p-3 text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Cart.CartItems)
+                                    {
+                                        <tr>
+                                            <td class="p-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                                         style="width: 50px; height: 50px;">
+                                                        <span class="fs-4">📦</span>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0">@item.Product?.Name</h6>
+                                                        <small class="text-muted">
+                                                            Categorie: @item.Product?.Category?.Name
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-3"><strong>@item.Product?.Price RON</strong></td>
+                                            <td class="p-3">@item.Quantity</td>
+                                            <td class="p-3 text-end text-success fw-bold">
+                                                @((item.Quantity * (item.Product?.Price ?? 0)).ToString("0.00")) RON
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white d-flex justify-content-end">
+                        <div class="fw-bold">
+                            Total: <span class="text-success">@Model.Cart.TotalAmount.ToString("0.00") RON</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+           
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Delivery details</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form asp-action="PlaceOrder" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-3">
+                                <label asp-for="DeliveryAddress" class="form-label"></label>
+                                <input asp-for="DeliveryAddress" class="form-control" placeholder="Street, number, city..." />
+                                <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Observations" class="form-label"></label>
+                                <textarea asp-for="Observations" class="form-control" rows="3" placeholder="Observations (optional)"></textarea>
+                                <span asp-validation-for="Observations" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="PaymentMethod" class="form-label">Payment method</label>
+                                <select asp-for="PaymentMethod" class="form-select">
+                                    <option value="0">Cash</option>
+                                    <option value="1">Card</option>
+                                </select>
+                                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                            </div>
+
+                            <hr />
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-bag-check"></i> Confirm order
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted">Secured payment</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

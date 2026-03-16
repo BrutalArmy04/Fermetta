@@ -1,0 +1,69 @@
+﻿@model Fermetta.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container py-5">
+    <div class="mb-4">
+        <h2 class="text-success">Order #@Model.OrderId</h2>
+        <p class="text-muted mb-1">
+            Placed on: @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+        </p>
+        <span class="badge bg-secondary">@Model.Status</span>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Products</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>
+                                @if (item.Product != null)
+                                {
+                                    <a asp-controller="Products"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Product.Product_Id">
+                                        @item.Product.Name
+                                    </a>
+                                }
+                            </td>
+                            <td>@item.Product?.Category?.Name</td>
+                            <td>@item.UnitPrice RON</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-end fw-bold text-success">
+                                @(item.Quantity* item.UnitPrice) RON
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white text-end">
+            <strong>Total: </strong>
+            <span class="fs-5 text-success">
+                @Model.TotalAmount.ToString("0.00") RON
+            </span>
+        </div>
+    </div>
+
+    <a asp-action="PersonalOrders" class="btn btn-outline-secondary">
+        ← Back to orders
+    </a>
+</div>

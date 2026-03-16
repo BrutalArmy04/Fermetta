@@ -1,0 +1,268 @@
+﻿@model Fermetta.Models.ViewModels.ChangeRequests.ChangeRequestInfo
+
+@{
+    ViewData["Title"] = "Propose a Change";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="Load" method="get" class="mb-4" id="loadForm">
+    <div class="row">
+        <div class="col-md-4">
+            <label asp-for="Type" class="form-label">Type</label>
+            <select asp-for="Type" class="form-control" id="crType">
+                <option value="1">Category</option>
+                <option value="2">Product</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="RequestAction" class="form-label">Action</label>
+            <select asp-for="RequestAction" class="form-control" id="crAction">
+                <option value="1">Create</option>
+                <option value="2">Update</option>
+            </select>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end" id="loadButtonBox">
+            <button type="submit" class="btn btn-outline-primary w-100">Load</button>
+        </div>
+    </div>
+
+    <div class="row mt-2" id="targetsRow">
+        <div class="col-md-6" id="targetCategoryBox">
+            <label asp-for="TargetCategoryId" class="form-label">Category to update</label>
+            <select asp-for="TargetCategoryId" class="form-control">
+                <option value="">-- Select a category --</option>
+                @if (Model.Categories != null)
+                {
+                    foreach (var c in Model.Categories)
+                    {
+                        <option value="@c.Item1">@c.Item2</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="TargetCategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6" id="targetProductBox">
+            <label asp-for="TargetProductId" class="form-label">Product to update</label>
+            <select asp-for="TargetProductId" class="form-control">
+                <option value="">-- Select a product --</option>
+                @if (Model.Products != null)
+                {
+                    foreach (var p in Model.Products)
+                    {
+                        <option value="@p.Item1">@p.Item2</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="TargetProductId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <small class="text-muted" id="loadHelp">
+        For updates: select a target and click Load to prefill the form.
+    </small>
+</form>
+
+<form asp-action="Create" method="post" id="submitForm" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Type" id="hiddenType" />
+    <input type="hidden" asp-for="RequestAction" id="hiddenAction" />
+    <input type="hidden" asp-for="TargetCategoryId" />
+    <input type="hidden" asp-for="TargetProductId" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="ContribuitorNote" class="form-label">Note (optional)</label>
+                <textarea asp-for="ContribuitorNote" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ContribuitorNote" class="text-danger"></span>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Type:</strong> <span id="infoType">@Model.Type</span>
+                &nbsp;|&nbsp;
+                <strong>Action:</strong> <span id="infoAction">@Model.RequestAction</span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+
+            <div id="categoryFields">
+                <h5>Category details</h5>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CategoryName" class="form-label">Name</label>
+                    <input asp-for="CategoryName" class="form-control" />
+                    <span asp-validation-for="CategoryName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CategoryDescription" class="form-label">Description</label>
+                    <textarea asp-for="CategoryDescription" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="CategoryDescription" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="CategoryAvailability" class="form-check-input" />
+                    <label asp-for="CategoryAvailability" class="form-check-label">Availability</label>
+                </div>
+            </div>
+
+            <div id="productFields">
+                <h5>Product details</h5>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ProductName" class="form-label">Name</label>
+                    <input asp-for="ProductName" class="form-control" />
+                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ProductDescription" class="form-label">Description</label>
+                    <textarea asp-for="ProductDescription" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ImageFile" class="form-label">Product Image</label>
+
+                    @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                    {
+                        <div class="mb-2 p-2 border rounded bg-light">
+                            <img src="@Model.ExistingImagePath" style="height: 100px; width: auto; object-fit: contain;" class="img-thumbnail" />
+                            <input type="hidden" asp-for="ExistingImagePath" />
+                            <div class="text-muted small mt-1">Current image. Upload a new one to replace it.</div>
+                        </div>
+                    }
+
+                    <input asp-for="ImageFile" class="form-control" type="file" accept=".png,.jpg,.jpeg,.gif" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Weight" class="form-label">Weight</label>
+                    <input asp-for="Weight" class="form-control" type="number" />
+                    <span asp-validation-for="Weight" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Validity" class="form-label">Expiration Date</label>
+                    <input asp-for="Validity" class="form-control" type="date" />
+                    <span asp-validation-for="Validity" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Price" class="form-label">Price</label>
+                    <input asp-for="Price" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Stock" class="form-label">Stock</label>
+                    <input asp-for="Stock" class="form-control" type="number" />
+                    <span asp-validation-for="Stock" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="Personalised" class="form-check-input" />
+                    <label asp-for="Personalised" class="form-check-label">Personalised</label>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Category_Id" class="form-label">Category</label>
+                    <select asp-for="Category_Id" class="form-control">
+                        <option value="">-- Select a category --</option>
+                        @if (Model.Categories != null)
+                        {
+                            foreach (var c in Model.Categories)
+                            {
+                                <option value="@c.Item1">@c.Item2</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="Category_Id" class="text-danger"></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit request</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function applyVisibility() {
+            var type = document.getElementById("crType").value; 
+            var action = document.getElementById("crAction").value; 
+  
+            document.getElementById("hiddenType").value = type;
+            document.getElementById("hiddenAction").value = action;
+
+            document.getElementById("infoType").innerText = (type === "1") ? "Category" : "Product";
+            document.getElementById("infoAction").innerText = (action === "1") ? "Create" : "Update";
+
+            var catFields = document.getElementById("categoryFields");
+            var prodFields = document.getElementById("productFields");
+
+            if (type === "1") {
+                catFields.classList.remove("d-none");
+                prodFields.classList.add("d-none");
+            } else {
+                catFields.classList.add("d-none");
+                prodFields.classList.remove("d-none");
+            }
+
+            var showLoad = (action === "2"); // update
+
+            var loadBtnBox = document.getElementById("loadButtonBox");
+            var targetsRow = document.getElementById("targetsRow");
+            var loadHelp = document.getElementById("loadHelp");
+
+            if (showLoad) {
+                loadBtnBox.classList.remove("d-none");
+                targetsRow.classList.remove("d-none");
+                loadHelp.classList.remove("d-none");
+            } else {
+                loadBtnBox.classList.add("d-none");
+                targetsRow.classList.add("d-none");
+                loadHelp.classList.add("d-none");
+            }
+
+            // Gestionează vizibilitatea dropdown-urilor specifice pentru Load
+            var targetCat = document.getElementById("targetCategoryBox");
+            var targetProd = document.getElementById("targetProductBox");
+
+            if (showLoad && type === "1") {
+                targetCat.classList.remove("d-none");
+                targetProd.classList.add("d-none");
+            } else if (showLoad && type === "2") {
+                targetCat.classList.add("d-none");
+                targetProd.classList.remove("d-none");
+            } else {
+                targetCat.classList.add("d-none");
+                targetProd.classList.add("d-none");
+            }
+        }
+
+        document.getElementById("crType").addEventListener("change", applyVisibility);
+        document.getElementById("crAction").addEventListener("change", applyVisibility);
+
+        document.addEventListener("DOMContentLoaded", applyVisibility);
+    </script>
+}
