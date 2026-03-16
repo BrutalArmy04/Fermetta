@@ -26,9 +26,12 @@ namespace Fermetta.Models.ViewModels.ChangeRequests
         [StringLength(100)]
         public string? ProductName { get; set; }
         public string? ProductDescription { get; set; }
+        [Range(0, 100000, ErrorMessage = "Weight must be 0 or greater.")]
         public int? Weight { get; set; }
         public DateTime? Validity { get; set; }
+        [Range(0.01, 100000, ErrorMessage = "Price must be strictly positive.")]
         public decimal? Price { get; set; }
+        [Range(0, 100000, ErrorMessage = "Stock cannot be negative.")]
         public int? Stock { get; set; }
         public bool Personalised { get; set; }
         public int? Category_Id { get; set; }

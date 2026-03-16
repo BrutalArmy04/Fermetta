@@ -145,7 +145,22 @@
 
     <div class="row mt-5">
         <div class="col-md-8 offset-md-2">
-            <h3 class="mb-4">Customer Reviews (@Model.ReviewsCount)</h3>
+            <div class="mb-4">
+                <h3>Customer Reviews (@Model.ReviewsCount)</h3>
+                @if (Model.ReviewsCount > 0)
+                {
+                    <div class="d-flex align-items-center mt-2">
+                        <strong class="me-2">Average Rating:</strong>
+                        <span class="badge bg-primary fs-6">@Model.AverageRating.ToString("0.0") / 5</span>
+                        <span class="ms-2 text-warning fs-5">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                @(i <= Math.Round(Model.AverageRating) ? "★" : "☆")
+                            }
+                        </span>
+                    </div>
+                }
+            </div>
 
             @if (User.Identity.IsAuthenticated)
             {
@@ -219,7 +234,7 @@
                                         @review.User.FirstName @review.User.LastName
                                         @if (isMyReview)
                                         {
-                                            <span class="badge bg-warning text-dark ms-2">Eu</span>
+                                            <span class="badge bg-warning text-dark ms-2">Me</span>
                                         }
                                     }
                                     else
