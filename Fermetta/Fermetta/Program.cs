@@ -24,8 +24,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<Fermetta.Services.Checkout>();
-
 builder.Services.AddScoped<IProductAssistantService, ProductAssistantService>();
 
 
