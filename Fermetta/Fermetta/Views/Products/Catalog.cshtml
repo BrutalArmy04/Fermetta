@@ -132,9 +132,12 @@
                             }
                             else
                             {
-                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
-                                    @Html.AntiForgeryToken()
+                                @* Anonymous visitors go through the RequireLogin/ResumeIntent flow:
+                                   a POST to AddToCart cannot be resumed after login (ReturnUrl replays as GET),
+                                   so we send the intent instead and the cart add happens after sign-in. *@
+                                <form asp-controller="Products" asp-action="RequireLogin" method="get">
                                     <input type="hidden" name="productId" value="@p.Product_Id" />
+                                    <input type="hidden" name="intent" value="cart" />
                                     <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                                     <div class="input-group mb-2">

@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Fermetta_Str0ng!Pass"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      # The app must not start before SQL Server is actually ready to accept logins,
+      # not merely "container running" — hence a real login attempt as the check.
+      test: /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "Fermetta_Str0ng!Pass" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # Environment variables override appsettings.json: "__" maps to ":".
+      # Inside the compose network, the SQL host is simply the service name "db".
+      ConnectionStrings__DefaultConnection: "Server=db;Database=Fermetta;User Id=sa;Password=Fermetta_Str0ng!Pass;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      # Optional: AI product assistant key (leave unset and the assistant just won't answer)
+      # OpenAI__ApiKey: "your-key-here"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mssql-data:

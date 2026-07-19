@@ -113,7 +113,7 @@
                         }
                         else
                         {
-                            <a href="@Url.Action("RequireLogin", "Products", new { productId = Model.Product.Product_Id, intent = "cart" })"
+                            <a href="@Url.Action("RequireLogin", "Products", new { productId = Model.Product.Product_Id, intent = "cart", returnUrl = Url.Action("Details", "Products", new { id = Model.Product.Product_Id }) })"
                                class="btn btn-outline-success">
                                 <i class="bi bi-cart-plus"></i> Add to Cart
                             </a>

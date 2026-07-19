@@ -389,10 +389,11 @@ namespace Fermetta.Controllers
         // unlogged user intent handling
 
         [AllowAnonymous]
-        public IActionResult RequireLogin(int productId, string intent, string returnUrl)
+        public IActionResult RequireLogin(int productId, string intent, string returnUrl, int quantity = 1)
         {
             TempData["Message"] = "To continue, please sign up or log in.";
-            string resumeUrl = Url.Action("ResumeIntent", "Products", new { productId = productId, intent = intent, returnUrl });
+            string resumeUrl = Url.Action("ResumeIntent", "Products",
+                new { productId, intent, quantity, returnUrl });
             return RedirectToPage("/Account/Login", new { area = "Identity", ReturnUrl = resumeUrl });
         }
 

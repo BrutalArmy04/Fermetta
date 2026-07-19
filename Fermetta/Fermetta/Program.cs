@@ -1,4 +1,4 @@
-using Fermetta.Data;
+﻿using Fermetta.Data;
 using Fermetta.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,10 +31,13 @@ builder.Services.AddScoped<IProductAssistantService, ProductAssistantService>();
 
 var app = builder.Build();
 
+
+
 //partea cu useri si roluri, prin seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    services.GetRequiredService<ApplicationDbContext>().Database.Migrate();  // ← linia nouă
     SeedData.Initialize(services);
 }
 
@@ -48,7 +51,12 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+
 app.UseRouting();
 
 app.UseAuthentication();
