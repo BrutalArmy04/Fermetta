@@ -75,6 +75,10 @@ The database is created, migrated and seeded on first run.
 The relational model (users, roles, products, categories, carts, orders, wishlists, reviews, change requests):
 
 ![Database diagram](Diagram.jpg)
+Login credentials for the seeded demo accounts:
+User: user@test.com, password: User1!
+Contrubuitor: contrib@test.com, password: Contrib1!
+Admin: admin@test.com, password: Admin1!
 
 ## 🛠️ Tech Stack
 

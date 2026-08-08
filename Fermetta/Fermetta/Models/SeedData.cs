@@ -20,7 +20,7 @@ namespace Fermetta.Models
                 {
                     context.Roles.AddRange(
                         new IdentityRole { Id = "1", Name = "Admin", NormalizedName = "ADMIN" },
-                        new IdentityRole { Id = "2", Name = "Contribuitor", NormalizedName = "Contribuitor" },
+                        new IdentityRole { Id = "2", Name = "Contribuitor", NormalizedName = "CONTRIBUITOR" },
                         new IdentityRole { Id = "3", Name = "User", NormalizedName = "USER" }
                     );
 
